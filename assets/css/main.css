@@ -3939,6 +3939,11 @@ a.lw__card { cursor: pointer; }
   font-size: var(--t-micro); color: var(--slate-soft);
   text-align: center; margin-top: 0.9rem;
 }
+/* --accent, not --gold: these notes sit on white, where gold is only 2.4:1
+   and fails AA. Underlined because the note text is already a muted colour,
+   so colour alone would not mark the link. */
+.enrol__note a { color: var(--accent); text-decoration: underline; }
+
 /* The proposed-venue caveat. Set apart with a rule and left-aligned so it
    reads as a specific qualification rather than more small print — it is
    correcting an impression the Venue row above would otherwise give. */
