@@ -381,7 +381,7 @@
     return '' +
       '<div class="ts-feature__media">' +
         (p.image
-          ? '<img src="' + FM.esc(p.image) + '" alt="" decoding="async" ' +
+          ? '<img src="' + FM.esc(p.image) + '" alt="" decoding="async" loading="lazy" ' +
             'onerror="this.closest(\'.ts-feature__media\').classList.add(\'is-empty\');this.remove();">'
           : "") +
         '<span class="ts-feature__scrim" aria-hidden="true"></span>' +

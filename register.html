@@ -311,6 +311,52 @@
           </p>
         </div>
 
+        <!-- ---------------------------------------------------------------
+             MANUAL HANDOFF — shown instead of the confirmation above when
+             no submission endpoint is configured (register.js ENDPOINT === "").
+
+             This panel exists so the form can never tell a delegate their
+             registration was received when nothing was actually sent. It
+             opens their mail client with every answer prefilled and asks
+             them to press send. The moment a Formspree/Web3Forms URL is
+             pasted into register.js, this panel stops being used and the
+             real confirmation above takes over — no markup change needed.
+             --------------------------------------------------------------- -->
+        <div class="form-success form-success--manual" id="form-manual">
+          <div class="form-success__mark form-success__mark--alert">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 4h16v13H7l-3 3z"/>
+            </svg>
+          </div>
+
+          <h2>One last step &mdash; please send your registration</h2>
+          <p class="measure" style="margin-inline:auto">
+            Your details are ready but <strong>have not been sent yet</strong>. We are
+            finalising our online booking system, so registrations come to us by email
+            for the moment. Your mail app should have opened with everything filled in
+            &mdash; just press send. If nothing opened, use the button below.
+          </p>
+
+          <dl class="form-success__recap">
+            <dt>Programme</dt>
+            <dd id="manual-programme"></dd>
+            <dt>Dates</dt>
+            <dd id="manual-dates"></dd>
+            <dt>Delegates</dt>
+            <dd id="manual-delegates"></dd>
+            <dt>Send to</dt>
+            <dd>trainings@forumminds.com</dd>
+          </dl>
+
+          <p>
+            <a class="btn btn--primary" id="manual-mailto" href="mailto:trainings@forumminds.com">
+              Open my email with the details
+            </a>
+            <a class="btn btn--ghost" href="programmes.html">Browse more programmes</a>
+          </p>
+        </div>
+
       </div>
 
       <!-- Reassurance panel -->
@@ -348,7 +394,7 @@
     <div class="site-footer__grid">
       <div>
         <a class="footmark" href="index.html" aria-label="ForumMinds — home">
-          <img src="assets/img/logo-forumminds-white.png" alt="ForumMinds Logo" width="1288" height="168">
+          <img src="assets/img/logo-forumminds-white.png" alt="ForumMinds Logo" width="1288" height="168" loading="lazy" decoding="async">
         </a>
         <p class="site-footer__blurb">
           Industry-driven corporate training. We develop the people who keep

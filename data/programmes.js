@@ -389,6 +389,27 @@ const FM = {
     return p.venue;
   },
 
+  /* True when the venue is a proposed city rather than a settled fact.
+     "Live Online" and "At your premises" are certain — they are properties of
+     the delivery format, not bookings. Every named city is a proposal until
+     Hamna confirms the hotel/centre (see the "venue" note in the header
+     comment above). Pages use this to qualify the venue in the copy, so a
+     delegate is never told a city is booked when it is not.
+
+     Confirming a venue means editing nothing here: replace the city string
+     with the real venue and add the slug to CONFIRMED_VENUES below. */
+  venueIsProposed: function (p) {
+    var label = FM.venueLabel(p);
+    if (!label) { return false; }                       /* format-derived */
+    if (label === "At your premises") { return false; } /* the client's own site */
+    return FM.CONFIRMED_VENUES.indexOf(p.slug) === -1;
+  },
+
+  /* Slugs whose venue is booked and can be stated as fact. Add to this list
+     as venues are confirmed; the "proposed" qualifier disappears per
+     programme, with no other change needed. */
+  CONFIRMED_VENUES: [],
+
   /* Category names for a programme, e.g. "Engineering · Oil & Gas" */
   categoryNames: function (p) {
     return p.category.map(function (id) {

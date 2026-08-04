@@ -59,12 +59,17 @@
   if (enrol) {
     var venue = FM.venueLabel(p);
 
+    /* City venues are proposals, not bookings — say so where the venue is
+       stated, rather than letting the row read as a confirmed fact. */
+    var venueProposed = FM.venueIsProposed(p);
+    var venueText = venue + (venueProposed ? " (proposed)" : "");
+
     var spec = [
       ["Dates", FM.dateRange(p)],
       ["Duration", p.days + " day" + (p.days === 1 ? "" : "s")],
       ["Format", fmtName],
       /* Venue is dropped when it only repeats the format, e.g. Live Online */
-      venue ? ["Venue", venue] : null,
+      venue ? ["Venue", venueText] : null,
       ["Level", p.level],
       ["Facilitator", p.trainer],
       ["Fee", p.fee]
@@ -88,6 +93,11 @@
           '<span class="arw" aria-hidden="true">&rarr;</span></a>' +
         '<p class="enrol__note">No payment is taken online. We confirm availability ' +
           'and send a written quotation before anything is booked.</p>' +
+        (venueProposed
+          ? '<p class="enrol__note enrol__note--flag">The city shown is the ' +
+            'proposed location. The exact venue is confirmed in writing before ' +
+            'booking, and we will tell you if it changes.</p>'
+          : "") +
         '<a class="btn btn--ghost btn--block" style="margin-top:0.75rem" ' +
           'href="contact.html">Ask a question</a>' +
       "</div>";

@@ -4,17 +4,23 @@
    confirmation panel.
 
    ---------------------------------------------------------------------------
-   IMPORTANT — REGISTRATIONS ARE NOT BEING EMAILED YET
+   IMPORTANT — NO SUBMISSION ENDPOINT IS CONFIGURED YET
    ---------------------------------------------------------------------------
-   The form validates fully and confirms to the delegate, but nothing is sent
-   anywhere. To start receiving registrations by email:
+   To start receiving registrations automatically:
 
      1. Create a free form at https://formspree.io or https://web3forms.com
      2. Copy the endpoint URL they give you.
      3. Paste it into ENDPOINT below, replacing the empty string.
 
-   That single change switches the form from demo mode to live. The submit
+   That single change switches the form from manual mode to live. The submit
    handler already does the fetch, the error handling and the success state.
+
+   UNTIL THEN the form runs in MANUAL MODE: on submit it opens the delegate's
+   mail client with every answer prefilled and shows the #form-manual panel,
+   which states plainly that nothing has been sent yet. It deliberately does
+   NOT show the "Registration received" confirmation — telling someone we have
+   their booking when no booking reached us is worse than having no form.
+   Setting ENDPOINT is what makes that confirmation truthful.
    ========================================================================== */
 
 var ENDPOINT = "";   /* <-- paste your Formspree / Web3Forms URL here */
@@ -28,6 +34,7 @@ var ENDPOINT = "";   /* <-- paste your Formspree / Web3Forms URL here */
   var alertBox = document.getElementById("form-alert");
   var alertList = document.getElementById("form-alert-list");
   var success = document.getElementById("form-success");
+  var manual = document.getElementById("form-manual");
   var submitBtn = document.getElementById("form-submit");
 
   /* ------------------------------------------------------------------------
@@ -207,8 +214,9 @@ var ENDPOINT = "";   /* <-- paste your Formspree / Web3Forms URL here */
     alertBox.classList.remove("is-shown");
 
     if (!ENDPOINT) {
-      /* Demo mode — no backend configured yet. See the note at the top. */
-      confirmSuccess();
+      /* Manual mode — no backend configured. Hand off to email rather than
+         claiming a submission that never happened. See the note at the top. */
+      handOffToEmail();
       return;
     }
 
@@ -255,10 +263,80 @@ var ENDPOINT = "";   /* <-- paste your Formspree / Web3Forms URL here */
     document.getElementById("recap-email").textContent =
       form.elements.email.value.trim();
 
+    reveal(success);
+  }
+
+  /* ------------------------------------------------------------------------
+     Manual handoff (no ENDPOINT configured)
+
+     Builds a plain-text email carrying every answer, opens the delegate's
+     mail client with it, and shows the #form-manual panel. The panel says
+     outright that nothing has been sent yet, so a delegate whose machine has
+     no mail client still learns the truth and is given the address.
+     ------------------------------------------------------------------------ */
+  function handOffToEmail() {
+    var p = FM.find(form.elements.programme.value);
+    var delivery = form.querySelector('input[name="delivery"]:checked');
+
+    document.getElementById("manual-programme").textContent =
+      p ? p.title : "To be confirmed";
+    document.getElementById("manual-dates").textContent =
+      p ? FM.dateRange(p) + " · " + p.venue : "To be agreed";
+    document.getElementById("manual-delegates").textContent =
+      form.elements.delegates.value +
+      " delegate" + (Number(form.elements.delegates.value) === 1 ? "" : "s");
+
+    /* Labels here are for a human reading the email, not for the DOM, so they
+       are written out rather than scraped from the <label> elements. */
+    var lines = [
+      ["Name", val("fullname")],
+      ["Job title", val("jobtitle")],
+      ["Organisation", val("company")],
+      ["Industry", val("industry")],
+      ["Email", val("email")],
+      ["Phone", val("phone")],
+      ["Country", val("country")],
+      ["", ""],
+      ["Programme", p ? p.title : form.elements.programme.value],
+      ["Dates", p ? FM.dateRange(p) : "To be agreed"],
+      ["Venue", p ? p.venue : "To be agreed"],
+      ["Delegates", val("delegates")],
+      ["Delivery format", delivery ? delivery.value : ""],
+      ["", ""],
+      ["Notes", val("notes")]
+    ];
+
+    var body = "Registration request from the ForumMinds website.\n\n" +
+      lines.map(function (row) {
+        if (!row[0]) { return ""; }
+        return row[0] + ": " + (row[1] || "—");
+      }).join("\n");
+
+    var subject = "Registration — " + (p ? p.title : "ForumMinds programme");
+
+    var href = "mailto:trainings@forumminds.com" +
+      "?subject=" + encodeURIComponent(subject) +
+      "&body=" + encodeURIComponent(body);
+
+    document.getElementById("manual-mailto").setAttribute("href", href);
+
+    reveal(manual);
+
+    /* Opening the client is a convenience, not the mechanism — the panel and
+       its button work regardless of whether this does anything. */
+    window.location.href = href;
+  }
+
+  function val(name) {
+    var el = form.elements[name];
+    return el ? String(el.value).trim() : "";
+  }
+
+  function reveal(panel) {
     form.hidden = true;
-    success.classList.add("is-shown");
-    success.setAttribute("tabindex", "-1");
-    success.focus();
-    success.scrollIntoView({ behavior: "smooth", block: "start" });
+    panel.classList.add("is-shown");
+    panel.setAttribute("tabindex", "-1");
+    panel.focus();
+    panel.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 })();

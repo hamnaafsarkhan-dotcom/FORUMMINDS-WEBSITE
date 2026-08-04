@@ -248,7 +248,7 @@ li { margin-bottom: 0.4em; }
   content: "";
   position: absolute; z-index: 0;
   left: 0; right: 0; top: -8%; height: 116%;
-  background: url("../../images/next%20to%20hero.jpg") center center / cover no-repeat;
+  background: url("../img/band-texture.jpg") center center / cover no-repeat;
   /* The source is 612x408 and this band is ~1400 wide, so it is being
      upscaled well past its resolution. The blur is not only styling — it is
      what stops that from reading as a low-quality image. Replace the file
@@ -691,13 +691,22 @@ li { margin-bottom: 0.4em; }
 
    TO CHANGE THE PHOTO edit the url() below. Wants to be 2000px+ and
    landscape, with its subject RIGHT of centre — the copy occupies the left.
+   Export it as JPEG, not PNG: this is a photograph, and the PNG this
+   replaced was 1.4MB for the same 1672px of pixels the 96KB JPEG carries.
    --------------------------------------------------------------------- */
 .hero::before {
   content: ""; position: absolute; inset: 0; z-index: 0;
   pointer-events: none;
-  background-image: url("../../images/female%20hero.png");
+  /* Phones get the 900px copy (40KB); everything else gets 1672px (96KB).
+     A background-image cannot use srcset, so the switch is a media query.
+     The SMALL file is the base rule and the large one is the upgrade — done
+     the other way round, phones would download both files. */
+  background-image: url("../img/hero-home-sm.jpg");
   background-size: cover;
   background-position: 64% center;
+}
+@media (min-width: 40rem) {
+  .hero::before { background-image: url("../img/hero-home.jpg"); }
 }
 
 /* Scrim. A flat 62% navy, per the brief, plus a soft left-weighted lift that
@@ -2248,7 +2257,7 @@ a.lw__card { cursor: pointer; }
      into the panel on its left edge, which is what lets it hold up at this
      size — a clean, unveiled crop would show the upscale. Replace with a
      1600px+ file and the treatment only gets better. */
-  background: url("../../images/next%20to%20hero.jpg") 58% center / cover no-repeat;
+  background: url("../img/band-texture.jpg") 58% center / cover no-repeat;
   filter: saturate(0.9) contrast(1.02);
   transform: scale(1);
   transition: transform 650ms var(--ease), filter 650ms var(--ease);
@@ -2660,10 +2669,14 @@ a.lw__card { cursor: pointer; }
    nowhere else on this page. */
 .up__f-img {
   position: absolute; inset: 0;
-  background: url("../../images/hero%20image%20background.png") 62% center / cover no-repeat;
+  /* Small file is the base rule, large one the upgrade — see .hero::before. */
+  background: url("../img/upcoming-feature-sm.jpg") 62% center / cover no-repeat;
   opacity: 0;
   transform: scale(1.04);
   transition: opacity 800ms var(--ease) 0.42s, transform 800ms var(--ease) 0.42s;
+}
+@media (min-width: 40rem) {
+  .up__f-img { background-image: url("../img/upcoming-feature.jpg"); }
 }
 .up.is-in .up__f-img { opacity: 1; transform: scale(1); }
 /* Fades the photo into the card. The card is navy now, so this veil is navy
@@ -3891,6 +3904,14 @@ a.lw__card { cursor: pointer; }
   font-size: var(--t-micro); color: var(--slate-soft);
   text-align: center; margin-top: 0.9rem;
 }
+/* The proposed-venue caveat. Set apart with a rule and left-aligned so it
+   reads as a specific qualification rather than more small print — it is
+   correcting an impression the Venue row above would otherwise give. */
+.enrol__note--flag {
+  text-align: left;
+  border-top: 1px solid var(--line);
+  padding-top: 0.8rem;
+}
 
 /* --------------------------------------------------------------------------
    13. FORMS
@@ -4043,6 +4064,19 @@ a.lw__card { cursor: pointer; }
 }
 .form-success__recap dd { margin: 0 0 0.8rem; color: var(--ink); font-weight: 600; }
 .form-success__recap dd:last-child { margin-bottom: 0; }
+
+/* Manual-handoff variant (shown while register.js has no ENDPOINT).
+   Deliberately reads as an unfinished action rather than a completed one:
+   the tick mark becomes an envelope, and the panel gets a visible border so
+   it does not carry the quiet, done-and-dusted feel of the success state. */
+.form-success--manual {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--paper);
+  padding: 2rem 1.5rem 1.75rem;
+}
+.form-success__mark--alert { background: var(--gold-tint); color: var(--accent); }
+.form-success--manual .btn { margin: 0 0.35rem 0.5rem; }
 
 /* --------------------------------------------------------------------------
    14. CTA BAND
