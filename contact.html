@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact Us &mdash; ForumMinds</title>
+<meta name="description" content="Contact ForumMinds for corporate training enquiries, quotations and group bookings. Email trainings@forumminds.com and we will respond within one business day.">
+<link rel="icon" href="assets/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href="index.html" aria-label="ForumMinds — home">
+      <img src="assets/img/logo-forumminds.png" alt="ForumMinds Logo" width="1288" height="168">
+    </a>
+
+    <nav class="nav" id="site-nav" aria-label="Main">
+      <a href="index.html">Home</a>
+
+      <div class="has-menu">
+        <button type="button" aria-expanded="false" aria-controls="menu-programmes">
+          Programmes
+          <svg width="10" height="7" viewBox="0 0 10 7" fill="none" aria-hidden="true"><path d="M1 1.5 5 5.5l4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <div class="menu" id="menu-programmes">
+          <div class="menu__col">
+            <span class="menu__title">Business &amp; people</span>
+            <a href="category-leadership.html">Leadership &amp; Management</a>
+            <a href="category-hr.html">Human Resources</a>
+            <a href="category-office-administration.html">Administration &amp; Office Management</a>
+          </div>
+          <div class="menu__col">
+            <span class="menu__title">Technical &amp; industrial</span>
+            <a href="category-oil-gas.html">Oil, Gas &amp; Heavy Industries</a>
+            <a href="category-engineering-tech.html">Engineering &amp; Technology</a>
+            <a href="category-ai.html">Artificial Intelligence</a>
+          </div>
+          <div class="menu__col">
+            <span class="menu__title">Commercial &amp; governance</span>
+            <a href="category-financial-management.html">Financial Management</a>
+            <a href="category-supply-chain.html">Supply Chain Management</a>
+            <a href="category-contract-management.html">Contract Management</a>
+            <a href="category-esg.html">ESG &amp; Sustainability</a>
+          </div>
+          <div class="menu__feature" id="menu-feature"></div>
+          <div class="menu__foot">
+            <a class="link-arw" href="programmes.html">Full programme catalogue <span class="arw" aria-hidden="true">&rarr;</span></a>
+            <a class="link-arw" href="training-schedule.html">Training Schedule <span class="arw" aria-hidden="true">&rarr;</span></a>
+          </div>
+        </div>
+      </div>
+
+      <a href="training-schedule.html">Training Schedule</a>
+      <a href="contact.html" aria-current="page">Contact</a>
+    </nav>
+
+    <div class="header-cta">
+      <a class="btn btn--primary" href="register.html">Register</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="page-head">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <a href="index.html">Home</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">Contact us</span>
+      </nav>
+      <span class="eyebrow">Contact</span>
+      <h1>Talk to us</h1>
+      <p class="page-head__lede">
+        Whether you know exactly which programme you need or are still scoping the
+        problem, start here. We reply within one working day.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================ TALK TO US ============================
+       Three routes into a conversation, then a trust strip. Styles in
+       main.css (TALK TO US), behaviour in assets/js/talk.js.
+
+       Everything is scoped to .talk. This section no longer builds on the
+       shared .card component — the cards are self-contained, so .card stays
+       exactly as the other pages use it.
+
+       WHERE THE BUTTONS GO
+       All three open a mail client, with a different subject line each. There
+       is no booking system and no enquiry form anywhere in this project — the
+       only form is register.html, which registers named delegates onto a
+       chosen programme and is the wrong destination for "tell us what you
+       need". Point cards 1 and 2 at a real form the moment one exists.
+
+       The email address is deliberately not printed on card 3, per the brief.
+       It remains visible in the footer of every page. Note that the footer no
+       longer carries a phone number or a head office address — both were
+       removed by request, and the phone number is now gone from the whole
+       site. Email is the only published contact route.
+       ==================================================================== -->
+  <section class="section talk" id="talk" aria-labelledby="talk-title">
+    <div class="talk__field" data-talk-field aria-hidden="true"></div>
+    <span class="talk__spot" data-talk-spot aria-hidden="true"></span>
+
+    <div class="wrap">
+      <div class="talk__head">
+        <h2 id="talk-title">Let&rsquo;s Start the Conversation</h2>
+        <p class="measure">
+          Whether you&rsquo;re planning a public programme, an in-house workshop, or a
+          customised learning solution, our team is ready to help you identify the right
+          training for your organisation.
+        </p>
+      </div>
+
+      <div class="talk__grid">
+
+        <article class="talk__card talk__card--primary">
+          <span class="talk__sweep" aria-hidden="true"></span>
+          <span class="talk__ribbon" aria-hidden="true">Recommended</span>
+
+          <span class="talk__ico talk__ico--cal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="5" width="18" height="16" rx="2.5"/>
+              <path d="M3 10h18M8 3v4M16 3v4"/>
+              <path class="talk__tick" d="m8.5 15 2.2 2.2 4.3-4.3"/>
+            </svg>
+          </span>
+
+          <h3>Request a Consultation</h3>
+          <p>
+            Discuss your training objectives with one of our learning advisors and receive
+            guidance on the most suitable programme.
+          </p>
+
+          <a class="talk__btn talk__btn--gold"
+             href="mailto:trainings@forumminds.com?subject=Consultation%20request">
+            Schedule a Consultation
+            <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3.5 9h11m0 0-4-4m4 4-4 4"/>
+            </svg>
+          </a>
+        </article>
+
+        <article class="talk__card talk__card--doc">
+          <span class="talk__sweep" aria-hidden="true"></span>
+
+          <span class="talk__ico talk__ico--doc">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path class="talk__page" d="M6 2.8h8l4.5 4.5v14H6z"/>
+              <path d="M14 2.8v4.7h4.5"/>
+              <path d="M9 12.5h6M9 16h4"/>
+            </svg>
+          </span>
+
+          <h3>Send an Enquiry</h3>
+          <p>
+            Tell us about your training requirements and receive a tailored recommendation
+            from our team.
+          </p>
+
+          <a class="talk__btn"
+             href="mailto:trainings@forumminds.com?subject=Training%20enquiry">
+            Start Your Enquiry
+            <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3.5 9h11m0 0-4-4m4 4-4 4"/>
+            </svg>
+          </a>
+        </article>
+
+        <article class="talk__card talk__card--mail">
+          <span class="talk__sweep" aria-hidden="true"></span>
+
+          <span class="talk__ico talk__ico--mail">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/>
+              <path class="talk__flap" d="m3.5 6.5 8.5 6 8.5-6"/>
+            </svg>
+            <svg class="talk__plane" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 3 10.5 13.5M21 3l-6.5 18-4-8.5L2 8.5z"/>
+            </svg>
+          </span>
+
+          <h3>Email Our Team</h3>
+          <p>
+            Reach our specialists directly for programme information, corporate enquiries
+            and customised learning solutions.
+          </p>
+
+          <a class="talk__btn" href="mailto:trainings@forumminds.com">
+            Email Our Team
+            <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3.5 9h11m0 0-4-4m4 4-4 4"/>
+            </svg>
+          </a>
+        </article>
+
+      </div>
+
+      <ul class="talk__trust">
+        <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="10" cy="10" r="8"/><path d="m6.6 10.2 2.3 2.3 4.5-4.6"/>
+            </svg>Corporate Training Specialists</li>
+        <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="10" cy="10" r="8"/><path d="m6.6 10.2 2.3 2.3 4.5-4.6"/>
+            </svg>Customised Learning Solutions</li>
+        <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="10" cy="10" r="8"/><path d="m6.6 10.2 2.3 2.3 4.5-4.6"/>
+            </svg>Public &amp; In-house Programmes</li>
+        <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="10" cy="10" r="8"/><path d="m6.6 10.2 2.3 2.3 4.5-4.6"/>
+            </svg>Middle East &amp; International Delivery</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section--panel">
+    <div class="wrap">
+      <div class="grid grid--2">
+        <div>
+          <span class="eyebrow">Professional learning solutions</span>
+          <h2>Professional Learning Solutions</h2>
+          <p class="measure">
+            Designed for professionals and organizations committed to continuous
+            growth, our programmes combine industry expertise with practical
+            learning to achieve meaningful business outcomes.
+          </p>
+          <ul class="tick-list" style="grid-template-columns:1fr 1fr;margin-top:1.5rem">
+            <li>Instructor-led corporate programmes</li>
+            <li>Executive workshops</li>
+            <li>Industry-focused learning</li>
+            <li>Public and private training sessions</li>
+            <li>Practical, outcome-driven approach</li>
+            <li>Certificate of participation</li>
+          </ul>
+        </div>
+
+        <div>
+          <span class="eyebrow">Common questions</span>
+          <h2>Before you write</h2>
+
+          <div class="faq">
+            <details>
+              <summary>How much does a programme cost?</summary>
+              <p>
+                Fees depend on the programme, the format and the number of delegates.
+                Send us the details and we will return a written quotation the same
+                working day.
+              </p>
+            </details>
+            <details>
+              <summary>Can you run a programme that is not listed?</summary>
+              <p>
+                Yes. Over 500 topics sit in the wider catalogue, and we build
+                programmes to order. Describe the capability gap and we will propose
+                an outline.
+              </p>
+            </details>
+            <details>
+              <summary>Do delegates receive a certificate?</summary>
+              <p>
+                Every delegate who completes a programme receives a ForumMinds
+                certificate of completion.
+              </p>
+            </details>
+            <details>
+              <summary>What is the minimum group size for in-house delivery?</summary>
+              <p>
+                In-house delivery usually becomes the cheaper option at around five
+                delegates. Below that, a scheduled session is normally better value.
+              </p>
+            </details>
+            <details>
+              <summary>Can you invoice a company rather than an individual?</summary>
+              <p>
+                Yes &mdash; almost all our registrations are invoiced to the employer.
+                Put the billing details in the notes field on the registration form.
+              </p>
+            </details>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="sec-head sec-head--row">
+        <div>
+          <span class="eyebrow">Next sessions</span>
+          <h2>Open for registration now</h2>
+        </div>
+        <a class="link-arw" href="training-schedule.html">Full schedule <span class="arw" aria-hidden="true">&rarr;</span></a>
+      </div>
+      <div id="contact-docket" class="docket"></div>
+    </div>
+  </section>
+
+  <section class="cta-band">
+    <div class="wrap cta-band__inner">
+      <div>
+        <h2>Ready to register?</h2>
+        <p>
+          If you already know the programme and the delegates, the registration form is
+          the quickest way through.
+        </p>
+      </div>
+      <div class="cta-band__actions">
+        <a class="btn btn--primary btn--lg" href="register.html">
+          Register delegates <span class="arw" aria-hidden="true">&rarr;</span>
+        </a>
+        <a class="btn btn--on-dark btn--lg" href="programmes.html">Browse programmes</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="site-footer__grid">
+      <div>
+        <a class="footmark" href="index.html" aria-label="ForumMinds — home">
+          <img src="assets/img/logo-forumminds-white.png" alt="ForumMinds Logo" width="1288" height="168">
+        </a>
+        <p class="site-footer__blurb">
+          Industry-driven corporate training. We develop the people who keep
+          organizations growing.
+        </p>
+        <div class="socials">
+          <a href="https://www.linkedin.com/company/forumminds" aria-label="ForumMinds on LinkedIn" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM10 9h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.4c0-1.29-.02-2.95-1.8-2.95-1.8 0-2.08 1.4-2.08 2.85V21h-4z"/></svg>
+          </a>
+          <a href="https://www.facebook.com/forumminds" aria-label="ForumMinds on Facebook" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.5 1.55-1.5H16.7V3.6c-.29-.04-1.29-.13-2.45-.13-2.43 0-4.09 1.48-4.09 4.2v2.23H7.45V13h2.71v8z"/></svg>
+          </a>
+          <a href="https://www.instagram.com/forumminds" aria-label="ForumMinds on Instagram" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="3.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <a href="https://twitter.com/forumminds" aria-label="ForumMinds on X" rel="noopener">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.7 3h3.3l-7.2 8.2L22 21h-6.6l-4.4-5.7L5.9 21H2.6l7.7-8.8L2 3h6.8l4 5.3zm-1.2 16h1.8L7.6 4.8H5.6z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <h4>Programmes</h4>
+        <ul>
+          <li><a href="category-leadership.html">Leadership &amp; Management</a></li>
+          <li><a href="category-ai.html">Artificial Intelligence</a></li>
+          <li><a href="category-oil-gas.html">Oil, Gas &amp; Heavy Industries</a></li>
+          <li><a href="category-engineering-tech.html">Engineering &amp; Technology</a></li>
+          <li><a href="category-financial-management.html">Financial Management</a></li>
+          <li><a href="category-supply-chain.html">Supply Chain Management</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="about.html">About us</a></li>
+          <li><a href="training-formats.html">Training formats</a></li>
+          <li><a href="training-schedule.html">Training Schedule</a></li>
+          <li><a href="programmes.html">All programmes</a></li>
+          <li><a href="register.html">Register</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Get in touch</h4>
+        <address>
+          <ul class="contact-list">
+            <li class="contact-item">
+              <span class="contact-item__icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="m3.5 6.5 8.5 6 8.5-6"/></svg>
+              </span>
+              <a class="contact-item__label" href="mailto:trainings@forumminds.com">trainings@forumminds.com</a>
+            </li>
+            <li class="contact-item">
+              <span class="contact-item__icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8.6"/><path d="M12 7.2V12l3.3 1.9"/></svg>
+              </span>
+              <span class="contact-item__label">Response within 1 business day</span>
+            </li>
+            <li class="contact-item">
+              <span class="contact-item__icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8.6"/><path d="M3.4 12h17.2"/><path d="M12 3.4a13.2 13.2 0 0 1 0 17.2 13.2 13.2 0 0 1 0-17.2z"/></svg>
+              </span>
+              <span class="contact-item__label">Serving clients worldwide</span>
+            </li>
+          </ul>
+        </address>
+      </div>
+    </div>
+
+    <div class="site-footer__bar">
+      <span>&copy; <span data-year>2026</span> ForumMinds. Industry-driven solutions.</span>
+      <span>Delivering industry-driven corporate training with measurable business impact.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="data/programmes.js"></script>
+<script src="assets/js/site.js"></script>
+<script src="assets/js/talk.js"></script>
+
+<script>
+  FMDocket.render(document.getElementById("contact-docket"), FM.upcoming(5));
+</script>
+</body>
+</html>

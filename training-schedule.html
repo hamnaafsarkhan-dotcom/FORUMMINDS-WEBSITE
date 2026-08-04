@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Training Schedule 2026 &mdash; ForumMinds</title>
+<meta name="description" content="Browse every upcoming ForumMinds programme through an interactive calendar or an executive schedule view. Filter by discipline, delivery mode, country or month.">
+<link rel="icon" href="assets/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- Shared header. There is no templating on this site — change it here,
+     change it everywhere. -->
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href="index.html" aria-label="ForumMinds — home">
+      <img src="assets/img/logo-forumminds.png" alt="ForumMinds Logo" width="1288" height="168">
+    </a>
+
+    <nav class="nav" id="site-nav" aria-label="Main">
+      <a href="index.html">Home</a>
+
+      <div class="has-menu">
+        <button type="button" aria-expanded="false" aria-controls="menu-programmes">
+          Programmes
+          <svg width="10" height="7" viewBox="0 0 10 7" fill="none" aria-hidden="true"><path d="M1 1.5 5 5.5l4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <div class="menu" id="menu-programmes">
+          <div class="menu__col">
+            <span class="menu__title">Business &amp; people</span>
+            <a href="category-leadership.html">Leadership &amp; Management</a>
+            <a href="category-hr.html">Human Resources</a>
+            <a href="category-office-administration.html">Administration &amp; Office Management</a>
+          </div>
+          <div class="menu__col">
+            <span class="menu__title">Technical &amp; industrial</span>
+            <a href="category-oil-gas.html">Oil, Gas &amp; Heavy Industries</a>
+            <a href="category-engineering-tech.html">Engineering &amp; Technology</a>
+            <a href="category-ai.html">Artificial Intelligence</a>
+          </div>
+          <div class="menu__col">
+            <span class="menu__title">Commercial &amp; governance</span>
+            <a href="category-financial-management.html">Financial Management</a>
+            <a href="category-supply-chain.html">Supply Chain Management</a>
+            <a href="category-contract-management.html">Contract Management</a>
+            <a href="category-esg.html">ESG &amp; Sustainability</a>
+          </div>
+          <div class="menu__feature" id="menu-feature"></div>
+          <div class="menu__foot">
+            <a class="link-arw" href="programmes.html">Full programme catalogue <span class="arw" aria-hidden="true">&rarr;</span></a>
+            <a class="link-arw" href="training-schedule.html">Training Schedule <span class="arw" aria-hidden="true">&rarr;</span></a>
+          </div>
+        </div>
+      </div>
+
+      <a href="training-schedule.html" aria-current="page">Training Schedule</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+
+    <div class="header-cta">
+      <a class="btn btn--primary" href="register.html">Register</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ======================================================================
+       TRAINING SCHEDULE
+       Calendar and Schedule are two renderings of one filtered list held in
+       assets/js/training-schedule.js. Switching tabs never refetches or
+       reloads — it cross-fades between two panes that are already in sync.
+       ====================================================================== -->
+  <section class="ts" id="ts">
+    <div class="ts__field" aria-hidden="true">
+      <div class="ts__glow ts__glow--a"></div>
+      <div class="ts__glow ts__glow--b"></div>
+      <svg class="ts__lines" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" focusable="false">
+        <defs>
+          <pattern id="ts-dots" width="26" height="26" patternUnits="userSpaceOnUse">
+            <circle cx="1" cy="1" r="1" fill="currentColor"/>
+          </pattern>
+        </defs>
+        <rect width="1440" height="900" fill="url(#ts-dots)" opacity="0.5"/>
+        <g fill="none" stroke="currentColor" stroke-width="1">
+          <path d="M-40 210 H 420 L 560 70 H 1040 L 1180 210 H 1500"/>
+          <path d="M-40 690 H 300 L 470 860 H 980 L 1120 690 H 1500"/>
+          <circle cx="560" cy="70" r="4"/>
+          <circle cx="1040" cy="70" r="4"/>
+          <circle cx="470" cy="860" r="4"/>
+          <circle cx="980" cy="860" r="4"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="wrap ts__inner">
+
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <a href="index.html">Home</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">Training Schedule</span>
+      </nav>
+
+      <header class="ts-head">
+        <span class="eyebrow">2026 season</span>
+        <h1>Training Schedule</h1>
+        <p class="ts-head__lede">
+          Browse all upcoming Forum Minds programmes through an interactive calendar
+          or an executive schedule view. Switch seamlessly between both to find the
+          programme that best fits your plans.
+        </p>
+      </header>
+
+      <!-- Summary bar. Values are counted from data/programmes.js at load, so
+           they cannot drift from the schedule below them. -->
+      <div class="ts-stats" id="ts-stats">
+        <div class="ts-stat">
+          <span class="ts-stat__num" data-count-to="0" id="ts-stat-programmes">0</span>
+          <span class="ts-stat__label">Upcoming programmes</span>
+        </div>
+        <div class="ts-stat">
+          <span class="ts-stat__num" data-count-to="0" id="ts-stat-countries">0</span>
+          <span class="ts-stat__label">Countries</span>
+        </div>
+        <div class="ts-stat">
+          <span class="ts-stat__num" data-count-to="0" id="ts-stat-formats">0</span>
+          <span class="ts-stat__label">Delivery formats</span>
+        </div>
+        <div class="ts-stat ts-stat--status">
+          <span class="ts-stat__dot" aria-hidden="true"></span>
+          <span class="ts-stat__num ts-stat__num--word">Open</span>
+          <span class="ts-stat__label">Registration</span>
+        </div>
+      </div>
+
+      <!-- Segmented control -->
+      <div class="ts-switch" id="ts-switch" role="tablist" aria-label="Schedule view">
+        <span class="ts-switch__thumb" aria-hidden="true"></span>
+        <button class="ts-switch__btn is-active" type="button" role="tab"
+                id="ts-tab-calendar" aria-selected="true" aria-controls="ts-pane-calendar" data-view="calendar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3"/></svg>
+          Calendar
+        </button>
+        <button class="ts-switch__btn" type="button" role="tab"
+                id="ts-tab-schedule" aria-selected="false" aria-controls="ts-pane-schedule" data-view="schedule" tabindex="-1">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M4 6.5h3M4 12h3M4 17.5h3M10 6.5h10M10 12h10M10 17.5h10"/></svg>
+          Schedule
+        </button>
+      </div>
+
+      <!-- Filters, shared by both views -->
+      <form class="ts-filters" id="ts-filters" role="search" autocomplete="off">
+        <div class="ts-field ts-field--search">
+          <svg class="ts-field__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+          <input type="search" id="ts-q" placeholder="Search programmes" aria-label="Search programmes">
+        </div>
+        <div class="ts-field">
+          <select id="ts-discipline" aria-label="Discipline"><option value="">All disciplines</option></select>
+          <svg class="ts-field__caret" width="10" height="7" viewBox="0 0 10 7" fill="none" aria-hidden="true"><path d="M1 1.5 5 5.5l4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="ts-field">
+          <select id="ts-format" aria-label="Delivery mode"><option value="">All delivery modes</option></select>
+          <svg class="ts-field__caret" width="10" height="7" viewBox="0 0 10 7" fill="none" aria-hidden="true"><path d="M1 1.5 5 5.5l4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="ts-field">
+          <select id="ts-country" aria-label="Country"><option value="">All countries</option></select>
+          <svg class="ts-field__caret" width="10" height="7" viewBox="0 0 10 7" fill="none" aria-hidden="true"><path d="M1 1.5 5 5.5l4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="ts-field">
+          <select id="ts-month" aria-label="Month"><option value="">All months</option></select>
+          <svg class="ts-field__caret" width="10" height="7" viewBox="0 0 10 7" fill="none" aria-hidden="true"><path d="M1 1.5 5 5.5l4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <button class="ts-filters__clear" type="button" id="ts-clear" hidden>Clear</button>
+        <p class="ts-filters__count" id="ts-count" role="status" aria-live="polite"></p>
+      </form>
+
+      <!-- ================= CALENDAR PANE ================= -->
+      <div class="ts-pane is-active" id="ts-pane-calendar" role="tabpanel" aria-labelledby="ts-tab-calendar">
+        <div class="ts-cal-layout">
+
+          <div class="ts-cal" id="ts-cal">
+            <div class="ts-cal__head">
+              <button class="ts-cal__nav" type="button" id="ts-prev" aria-label="Previous month">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+              </button>
+              <h2 class="ts-cal__label" id="ts-month-label" aria-live="polite">&nbsp;</h2>
+              <button class="ts-cal__nav" type="button" id="ts-next" aria-label="Next month">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+
+            <div class="ts-cal__dows" aria-hidden="true">
+              <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+            </div>
+
+            <div class="ts-cal__stage">
+              <div class="ts-cal__grid" id="ts-grid" aria-labelledby="ts-month-label"></div>
+            </div>
+
+            <p class="ts-cal__key">
+              <span class="ts-cal__key-item"><i class="ts-key-dot" aria-hidden="true"></i> Session running</span>
+              <span class="ts-cal__key-item"><i class="ts-key-ring" aria-hidden="true"></i> Today</span>
+            </p>
+          </div>
+
+          <!-- Featured programme panel -->
+          <article class="ts-feature" id="ts-feature" aria-live="polite">
+            <div class="ts-feature__inner" id="ts-feature-inner"></div>
+          </article>
+
+        </div>
+      </div>
+
+      <!-- ================= SCHEDULE PANE ================= -->
+      <div class="ts-pane" id="ts-pane-schedule" role="tabpanel" aria-labelledby="ts-tab-schedule" hidden>
+        <div class="ts-list" id="ts-list"></div>
+      </div>
+
+      <p class="ts-foot measure">
+        Dates shown are confirmed sessions open for registration. Any programme in the
+        catalogue can also be run in-house at your premises on dates that suit you &mdash;
+        <a href="contact.html">tell us what you need</a>.
+      </p>
+
+    </div>
+  </section>
+
+  <section class="cta-band">
+    <div class="wrap cta-band__inner">
+      <div>
+        <h2>Found the right session?</h2>
+        <p>
+          Send us your delegate details and we will confirm the place and issue a
+          written quotation the same working day.
+        </p>
+      </div>
+      <div class="cta-band__actions">
+        <a class="btn btn--primary btn--lg" href="register.html">
+          Register delegates <span class="arw" aria-hidden="true">&rarr;</span>
+        </a>
+        <a class="btn btn--on-dark btn--lg" href="programmes.html">Browse all programmes</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="site-footer__grid">
+      <div>
+        <a class="footmark" href="index.html" aria-label="ForumMinds — home">
+          <img src="assets/img/logo-forumminds-white.png" alt="ForumMinds Logo" width="1288" height="168">
+        </a>
+        <p class="site-footer__blurb">
+          Industry-driven corporate training. We develop the people who keep
+          organizations growing.
+        </p>
+        <div class="socials">
+          <a href="https://www.linkedin.com/company/forumminds" aria-label="ForumMinds on LinkedIn" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM10 9h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.4c0-1.29-.02-2.95-1.8-2.95-1.8 0-2.08 1.4-2.08 2.85V21h-4z"/></svg>
+          </a>
+          <a href="https://www.facebook.com/forumminds" aria-label="ForumMinds on Facebook" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.5 1.55-1.5H16.7V3.6c-.29-.04-1.29-.13-2.45-.13-2.43 0-4.09 1.48-4.09 4.2v2.23H7.45V13h2.71v8z"/></svg>
+          </a>
+          <a href="https://www.instagram.com/forumminds" aria-label="ForumMinds on Instagram" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="3.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <a href="https://twitter.com/forumminds" aria-label="ForumMinds on X" rel="noopener">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.7 3h3.3l-7.2 8.2L22 21h-6.6l-4.4-5.7L5.9 21H2.6l7.7-8.8L2 3h6.8l4 5.3zm-1.2 16h1.8L7.6 4.8H5.6z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <h4>Programmes</h4>
+        <ul>
+          <li><a href="category-leadership.html">Leadership &amp; Management</a></li>
+          <li><a href="category-ai.html">Artificial Intelligence</a></li>
+          <li><a href="category-oil-gas.html">Oil, Gas &amp; Heavy Industries</a></li>
+          <li><a href="category-engineering-tech.html">Engineering &amp; Technology</a></li>
+          <li><a href="category-financial-management.html">Financial Management</a></li>
+          <li><a href="category-supply-chain.html">Supply Chain Management</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="about.html">About us</a></li>
+          <li><a href="training-formats.html">Training formats</a></li>
+          <li><a href="training-schedule.html">Training Schedule</a></li>
+          <li><a href="programmes.html">All programmes</a></li>
+          <li><a href="register.html">Register</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Get in touch</h4>
+        <address>
+          <ul class="contact-list">
+            <li class="contact-item">
+              <span class="contact-item__icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="m3.5 6.5 8.5 6 8.5-6"/></svg>
+              </span>
+              <a class="contact-item__label" href="mailto:trainings@forumminds.com">trainings@forumminds.com</a>
+            </li>
+            <li class="contact-item">
+              <span class="contact-item__icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8.6"/><path d="M12 7.2V12l3.3 1.9"/></svg>
+              </span>
+              <span class="contact-item__label">Response within 1 business day</span>
+            </li>
+            <li class="contact-item">
+              <span class="contact-item__icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8.6"/><path d="M3.4 12h17.2"/><path d="M12 3.4a13.2 13.2 0 0 1 0 17.2 13.2 13.2 0 0 1 0-17.2z"/></svg>
+              </span>
+              <span class="contact-item__label">Serving clients worldwide</span>
+            </li>
+          </ul>
+        </address>
+      </div>
+    </div>
+
+    <div class="site-footer__bar">
+      <span>&copy; <span data-year>2026</span> ForumMinds. Industry-driven solutions.</span>
+      <span>Delivering industry-driven corporate training with measurable business impact.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="data/programmes.js"></script>
+<script src="assets/js/site.js"></script>
+<script src="assets/js/training-schedule.js"></script>
+
+</body>
+</html>

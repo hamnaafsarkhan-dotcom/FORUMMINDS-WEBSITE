@@ -1,0 +1,28 @@
+Programme photographs — licence record
+======================================
+
+Every image in this folder is public domain / CC0: free for commercial use,
+no attribution required, no permission needed. Credits are recorded here for
+your own audit trail, not because the licence demands them.
+
+Source: StockSnap.io (CC0 1.0 Universal) unless noted.
+
+  excel-beyond-basics.jpg          StockSnap PHE63L27S6  "Business Working"
+  strategic-hr.jpg                 StockSnap DUXISHKTT3  "Business People"
+  piping-vibration.jpg             StockSnap F6C12E015C  "Pipes Pipeline"
+  cultural-intelligence.jpg        StockSnap IS1XRUWYW4  "Business People"
+  maintenance-scheduling.jpg       StockSnap TJ20HKB9BY  "Industrial Machine"
+  elite-executive-assistant.jpg    StockSnap KPVOIKEPSG  "Colleagues Meeting"
+  advanced-budgeting.jpg           StockSnap RRJH1KMRMW  "Business Working"
+  ai-ready-critical-thinking.jpg   StockSnap XDAR6MIG75  "Business Presenting"
+
+  ai-supply-chains.jpg             Rawpixel (CC0) "Shipping containers port"
+
+These are placeholders in the sense that they are stock, not photographs of
+a real ForumMinds session. Swapping any of them is a one-line change: drop a
+new file in this folder under the same name, or edit the "image" field on the
+matching programme in data/programmes.js.
+
+Recommended replacement spec: landscape, at least 960px wide, JPEG, subject
+weighted to the left or centre (the panel crops from the right on narrow
+screens).

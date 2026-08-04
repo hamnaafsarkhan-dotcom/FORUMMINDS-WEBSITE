@@ -1,0 +1,14 @@
+# ForumMinds — static site. There is no build step, so there is almost
+# nothing to ignore. Only OS/editor droppings.
+
+# Windows / macOS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~

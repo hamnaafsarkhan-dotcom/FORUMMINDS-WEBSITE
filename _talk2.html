@@ -1,0 +1,67 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>talk2</title>
+<style>html,body{margin:0;background:#EEF3F8}iframe{border:0;width:100vw;height:100vh;display:block}</style>
+<iframe id="f" src="contact.html"></iframe>
+<script>
+var Q = new URLSearchParams(location.search);
+document.getElementById('f').onload = function () {
+  var w = this.contentWindow, d = this.contentDocument;
+  setTimeout(function () {
+    d.documentElement.style.scrollBehavior = 'auto';
+    var st = d.createElement('style');
+    st.textContent = '*,*::before,*::after{transition:none!important;animation:none!important}';
+    d.head.appendChild(st);
+    Array.prototype.forEach.call(d.querySelectorAll('.reveal'), function (el) {
+      el.classList.add('is-in');
+    });
+    var talk = d.querySelector('#talk');
+    talk.classList.add('is-in');
+
+    if (Q.has('hover')) {
+      talk.classList.add('is-live');
+      var which = Q.get('hover');
+      var sel = which === '1' ? '.talk__card--primary'
+              : which === '2' ? '.talk__card--doc' : '.talk__card--mail';
+      var h = d.createElement('style');
+      h.textContent =
+        sel + '{transform:translateY(-8px);border-color:var(--talk-blue-hi);' +
+        'background:rgba(255,255,255,.99);' +
+        'box-shadow:var(--talk-sh-hi),0 0 28px rgba(74,134,199,.18)}' +
+        sel + ' .talk__sweep{transform:translateX(20%);opacity:1}' +
+        sel + ' .talk__btn svg{transform:translateX(6px)}' +
+        sel + ' .talk__btn::after{transform:translateX(20%)}' +
+        '.talk__card--primary' + (which === '1' ? '' : '.none') +
+        '{transform:translateY(-10px) scale(1.02);' +
+        'border-color:rgba(201,162,39,.62);' +
+        'background:linear-gradient(158deg,#17416C 0%,#123456 52%,#0C2740 100%);' +
+        'box-shadow:var(--talk-sh-hi),0 0 34px rgba(201,162,39,.24)}' +
+        '.talk__card--primary .talk__ico--cal::after{opacity:' + (which === '1' ? 1 : 0) + '}' +
+        '.talk__card--primary .talk__tick{stroke-dashoffset:' + (which === '1' ? 0 : 12) + '}' +
+        (which === '2' ? '.talk__page{transform:rotateY(-26deg) skewY(-2deg)}' +
+                         '.talk__card--doc .talk__ico svg{transform:translateY(-2px)}' : '') +
+        (which === '3' ? '.talk__flap{transform:translateY(-1.6px) scaleY(.72)}' +
+                         '.talk__plane{opacity:1;transform:translate(22px,-16px) scale(1)}' : '');
+      d.head.appendChild(h);
+      var sp = d.querySelector('.talk__spot');
+      if (sp) sp.style.transform = 'translate3d(380px,300px,0)';
+    }
+
+    w.scrollTo(0, talk.getBoundingClientRect().top + w.scrollY + Number(Q.get('off') || 0) - 40);
+
+    var cards = d.querySelectorAll('.talk__card');
+    document.title =
+      'cards=' + cards.length +
+      ' | h2="' + d.querySelector('#talk-title').textContent.trim() + '"' +
+      ' | titles=' + Array.prototype.map.call(cards, function (c) {
+          return c.querySelector('h3').textContent.trim(); }).join('/') +
+      ' | btns=' + Array.prototype.map.call(d.querySelectorAll('.talk__btn'), function (b) {
+          return b.textContent.trim(); }).join('/') +
+      ' | hrefs=' + Array.prototype.map.call(d.querySelectorAll('.talk__btn'), function (b) {
+          return b.getAttribute('href').replace('mailto:trainings@forumminds.com', 'MAIL'); }).join(' ') +
+      ' | trust=' + d.querySelectorAll('.talk__trust li').length +
+      ' | oldCards=' + d.querySelectorAll('.contact-card__icon').length +
+      ' | emailShown=' + (d.querySelector('#talk').textContent.indexOf('@forumminds') !== -1);
+  }, 900);
+};
+</script>
