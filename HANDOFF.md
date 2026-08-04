@@ -2,7 +2,9 @@
 
 Static marketing site for **ForumMinds**, a corporate training provider headquartered in Karachi, selling into the Gulf/Middle East. It replaces forumminds.com, an old WordPress LMS theme whose demo content had leaked into production (course URLs like `nutrition-masterclass`, trainers listed as `admin`, a two-day course showing "96 hours").
 
-Build started 2026-07-29. Plain HTML/CSS/JS, **no build step, no npm, no framework, no git repo initialized**. Every file is edited and opened directly.
+Build started 2026-07-29. Plain HTML/CSS/JS, **no build step, no npm, no framework**. Every file is edited and opened directly.
+
+**A git repository now exists** (initialized 2026-08-04, local only, nothing pushed anywhere). The first commit, `89aff97`, is the site exactly as it stood at the pre-launch audit, *before* any of the audit fixes — so every deleted file is recoverable with `git checkout 89aff97 -- <path>`, including the 40MB of photography removed in §6.
 
 ---
 
@@ -10,7 +12,8 @@ Build started 2026-07-29. Plain HTML/CSS/JS, **no build step, no npm, no framewo
 
 - Open any `.html` file directly in a browser (`file://`) — nothing needs a server. If you add fetch-based features later, you'll need `python -m http.server` or similar because `file://` blocks fetch.
 - There is **no package.json, no bundler, no linter**. Don't introduce one unless asked — that's a deliberate constraint (Hamna doesn't want a build step to maintain).
-- **No git repository exists yet** (`git status` fails with "not a git repository"). If you start using version control, that's a meaningful step — confirm with Hamna before running `git init` in case they'd rather do it themselves or already have a plan (e.g. pushing to an existing GitHub repo).
+- Git is initialized locally with no remote. If Hamna wants this on GitHub, `git remote add origin <url>` and push — the history is already meaningful (one commit per audit section).
+- **Image work has no CLI tooling here.** There is no ImageMagick, no Node, no working Python in this environment. Resizing and re-encoding was done with PowerShell + `System.Drawing`, and WebP decoding needs `PresentationCore`'s WIC decoder instead (`System.Drawing` cannot read WebP at all). Working scripts are described in §10.
 
 ---
 
@@ -28,8 +31,18 @@ training-schedule.html              THE TRAINING SCHEDULE — the site's signatu
 calendar.html                       Redirect stub only. The page moved to
                                      training-schedule.html when the "Calendar" nav item was
                                      renamed; this file exists so old bookmarks and printed
-                                     links still land somewhere. Safe to delete if you add a
-                                     301 at the host instead.
+                                     links still land somewhere. Carries noindex + an absolute
+                                     canonical, and is excluded from sitemap.xml and robots.txt.
+                                     Safe to delete if you add a 301 at the host instead.
+
+robots.txt                          Allows everything except the calendar.html stub; points
+                                     at the sitemap.
+sitemap.xml                         All 26 real pages with priorities. NOT generated at build
+                                     time (there is no build) — regenerate it by hand when you
+                                     add or remove a page, or it will quietly go stale.
+favicon.ico                         Root-level icon. Browsers request /favicon.ico regardless
+                                     of what the <link> tags say, so it lives here rather than
+                                     in assets/. See §9.
 training-formats.html               Explains Live Online / In-Person / In-House
 category-*.html   (10 files)        One page per training category (leadership, ai, oil-gas,
                                      engineering-tech, financial-management, supply-chain, hr,
@@ -54,7 +67,19 @@ assets/
                                      colour/type/spacing tokens live in one :root block at the top
                                      — nothing else in the file hardcodes a colour. See §4.
                                      Section 18 is the whole training schedule, prefixed .ts.
-  img/                              hero.jpg, about.jpg, formats.jpg
+  img/                              about.jpg, formats.jpg (page-head photos)
+    hero-home.jpg  hero-home-sm.jpg     The homepage hero photograph, at 1672px and 900px.
+                                     Re-exported from the old 1.4MB PNG at 96KB / 40KB. CSS
+                                     serves the small one by default and the large one above
+                                     40rem — see the comment on .hero::before in main.css.
+    upcoming-feature.jpg  -sm.jpg   Same treatment for the "upcoming programmes" panel photo.
+    band-texture.jpg                The blurred band texture (was images/next to hero.jpg).
+                                     Still a 612x408 source used at ~1400 wide — see §5.
+    og-forumminds.jpg               1200x630 social share card, generated from the hero photo
+                                     plus the reversed logo. Referenced by every page's
+                                     og:image and twitter:image.
+    favicon-512.png                 The "O" mark on a navy plate, cropped from the master
+    apple-touch-icon.png             artwork. See §9.
     logo-forumminds.png             THE BRAND LOGO — full colour, used in the header of every
                                      page. Hamna's finalized artwork, supplied as
                                      images/Logo.png (8311x1084) and resampled to 1288x168 for
@@ -65,32 +90,29 @@ assets/
                                      automated colour swap (navy -> white, gold arc untouched) —
                                      replace with a designer-supplied reversed file if one ever
                                      turns up. See §9.
-    logo.png                        Old logo. Still referenced, but ONLY as the favicon
-                                     (<link rel="icon">) on every page — see §9.
-    logo-mark.svg,                  Earlier logo explorations. Unused by any page, and were
-    logo-horizontal*.svg             already unused before the finalized logo landed.
   img/programmes/                   One landscape photograph per programme, named by slug, used
                                      by the training schedule's featured panel. All CC0 stock —
                                      see CREDITS.txt in that folder for the licence record and
-                                     the replacement spec.
+                                     the replacement spec. All nine are 960x640 JPEG at q80,
+                                     45–141KB. If you drop a replacement in, re-encode it —
+                                     the originals averaged 340KB for the same pixels.
   js/
     site.js                         Global: nav, header behaviour, shared interactions
     programmes-render.js            Renders programme cards/listings from data/programmes.js
     programme-page.js                Populates a single programme-*.html detail page
     training-schedule.js            Training schedule: segmented control, month calendar,
                                      featured panel, schedule list, filters, counters
-    calendar.js                     ⚠️ UNUSED. Drove the old calendar.html. Nothing loads it
-                                     now — delete it once you are happy with the new page.
     register.js                     Registration form — validation + submission (see §5)
+    contact.js                      Enquiry form on contact.html — validation + submission.
+                                     Mirrors register.js, including its ENDPOINT switch (see §5)
     disciplines.js, journey.js, why.js, stats.js, upcoming.js, delivery.js, talk.js,
     logo-wall.js, scroll-expand-hero.js   Page-specific widgets/sections
 
-images/                             ⚠️ SEE §6 — CLEANUP NEEDED. Mostly real photo assets
-                                     (engineer.jpg, hero background, etc.) but ALSO contains a
-                                     stray nested copy of assets/ and data/ from 2026-07-29
-                                     (images/assets/..., images/data/...). That nested copy is
-                                     STALE and unused by any page — do not edit it, and flag it
-                                     for deletion with Hamna rather than silently removing it.
+images/                             Now holds ONE file: Logo.png, the untouched 8311x1084 master
+                                     artwork (§9). It is not referenced by any page — it is kept
+                                     as the source of truth for re-exporting the logo, and is
+                                     small enough (142KB) not to matter. Everything else that
+                                     was in here was unreferenced and has been removed (§6).
 
 logos/                              Client/partner logos for the logo wall (ADNOC, Baker Hughes,
                                      DEWA, DP World, Emirates, Petroleum Development Corp,
@@ -136,9 +158,17 @@ logos/                              Client/partner logos for the logo wall (ADNO
 
 ## 5. Pending / not yet real
 
-1. **Registration form is not wired up.** `assets/js/register.js` line 20: `var ENDPOINT = "";`. The form fully validates and shows a success state, but submits nowhere. To go live: create a form at formspree.io or web3forms.com and paste the endpoint URL into that variable — no other code change needed.
+1. **⚠️ THE ONE THING STILL BLOCKING A FULLY-FUNCTIONING LAUNCH: no form endpoint.**
+   Two variables, both currently `""`:
+   - `assets/js/register.js` → `var ENDPOINT = "";`
+   - `assets/js/contact.js` → `var CONTACT_ENDPOINT = "";`
+
+   Create one form at [formspree.io](https://formspree.io) or [web3forms.com](https://web3forms.com) and paste the same URL into both. That single change switches both forms from manual mode to live; the fetch, error handling and success states already exist.
+
+   **The site is safe to deploy before that happens.** It used to say "Registration received… we will send a written quotation within one working day" while sending nothing at all — a confident false confirmation to every person who registered. That is fixed. With no endpoint set, both forms now run in **manual mode**: they open the visitor's mail client with every answer prefilled and show a panel that says outright the message *has not been sent yet*, with the address to use if no mail client opens. It is a worse experience than a real endpoint; it is not a dishonest one. Setting the endpoint is what makes the success confirmation truthful, so do it before launch if you can.
+
 2. **Three placeholder fields throughout `data/programmes.js`,** flagged in that file's own header comment:
-   - `venue` — city venues are proposed, not confirmed (only "Live Online" entries are certain).
+   - `venue` — city venues are proposed, not confirmed (only "Live Online" entries are certain). This is now *visible to the visitor*: programme pages render the venue as "Riyadh, Saudi Arabia (proposed)" plus a note under the enrolment panel. To confirm a venue, replace the string and add the slug to `FM.CONFIRMED_VENUES` in `data/programmes.js` — the qualifier disappears for that programme only.
    - `fee` — "On request" for every programme; replace with real pricing when set.
    - `trainer` — "Industry Expert" for every programme (matches what forumminds.com currently states); replace with real names/bios when available.
 3. **`ai-ready-critical-thinking` programme has no schedule yet** (`startDate`/`endDate` are `null` by design) — it shows as "Dates on request", cannot be plotted on the calendar, and instead appears as an "also available on request" chip under the calendar and as a `DATES / TBC` row in the Schedule view. Fill in dates once scheduled.
@@ -147,9 +177,15 @@ logos/                              Client/partner logos for the logo wall (ADNO
 
 ---
 
-## 6. Cleanup flagged, not yet actioned
+## 6. Cleanup — DONE (2026-08-04)
 
-`images/assets/` and `images/data/` are a **stale, nested duplicate** of the real `assets/` and `data/` folders, dated 2026-07-29 (vs. current `assets/css/main.css` at 166KB last modified 2026-08-01 — the stale copy is 57KB). Nothing in any of the 27 real pages references paths under `images/assets/...` or `images/data/...` — they appear to have been copied in accidentally at some point. Recommend confirming with Hamna and deleting `images/assets/` and `images/data/` entirely; left them in place pending that confirmation rather than deleting unilaterally.
+The deploy directory went from **42.7MB to 5.0MB**. Everything removed was verified unreferenced first, by searching every `.html`, `.css` and `.js` file for each filename in both raw and URL-encoded form (the CSS used `%20` for names with spaces, which is why a naive search missed them).
+
+Removed: `images/engineer.jpg` (13.8MB), `images/happy-young-man-architect-hard-hat-holding-folder.jpg` (13.5MB), `images/low-angle-shot-man-looking-away.jpg` (9.3MB), the superseded `images/female hero.png` and `images/hero image background.png` PNGs, `images/next to hero.jpg` (moved to `assets/img/band-texture.jpg`), the stale `images/assets/` + `images/data/` duplicate tree, `assets/img/hero.jpg` (unused since the hero photo changed), the superseded `assets/img/logo.png` and the three unused logo SVGs, plus `_talk2.html` and `assets/js/calendar.js`.
+
+**All of it is recoverable:** `git checkout 89aff97 -- "<path>"`. Nothing was deleted before that baseline commit existed.
+
+`images/Logo.png` was deliberately kept — it is the untouched master artwork (§9) and the source for re-exporting the logo and favicons.
 
 ---
 
@@ -286,11 +322,24 @@ section.
    professionally reversed asset is later supplied by the designer, prefer that** — this one was
    produced with an automated colour swap, which is a fair stand-in but not the primary source
    of truth for the brand.
-2. **The favicon is still the OLD logo.** Every page carries
-   `<link rel="icon" href="assets/img/logo.png">`. It was left alone because the brief covered
-   the header and footer only. Worth replacing with a square crop of the finalized mark — a
-   wide wordmark makes a poor favicon, so it wants the "O" mark on its own, which is artwork
-   Hamna would need to supply.
+2. **The favicon is now the real mark** (replaced 2026-08-04; it used to be the superseded
+   `assets/img/logo.png`). A 7.667:1 wordmark makes a hopeless favicon, so the icon is the
+   **"O" mark on its own** — cropped straight out of `images/Logo.png` rather than redrawn.
+
+   How it was cut, in case it needs redoing: the glyph boundaries were found by scanning the
+   master for fully-empty pixel columns between letters, which puts the "O" at x 823–1685,
+   y 116–977 (862 x 861 — essentially square, which is what makes it work). The navy pixels
+   were then swapped to white by the same two-ink colour distance rule used for
+   `logo-forumminds-white.png`, leaving the gold arc untouched, and the result was centred at
+   62% scale on a `--ink` (#0B1B2B) plate.
+
+   White-on-navy rather than navy-on-transparent **on purpose**: a transparent favicon
+   disappears against a dark browser tab strip, which is where a large share of them are seen.
+
+   Four files ship: `favicon.ico` at the site root (a 32px PNG in an ICO container — browsers
+   request `/favicon.ico` by path regardless of what the `<link>` tags say),
+   `assets/img/favicon-512.png`, and `assets/img/apple-touch-icon.png` at 180px. Regenerate all
+   four together from the master if the artwork is ever reissued.
 
 The old footer lockup — an inline SVG ring plus `<b>FORUM</b><span>MINDS</span>` text, a
 hand-built approximation of the logo — has been removed along with its `.footmark__ring` and
@@ -332,73 +381,133 @@ every page picks it up, since both are referenced by path, not inlined.
 
 ---
 
-## 10. Pre-launch audit (2026-08-02) — NOT launch-ready, one blocker
+## 10. Pre-launch audit (2026-08-02) and the fixes applied (2026-08-04)
 
-An independent audit (static code review + headless-browser verification, no files changed)
-scored the site **66/100 — not ready to launch**. The design, layout, accessibility and security
-posture are all genuinely solid; what's blocking launch is functional and content-hygiene, not
-visual. Full findings below so the next conversation doesn't have to re-derive them.
+An independent audit — static review plus headless-browser verification, no files changed —
+scored the site **66/100, not launch-ready**, with one blocker. Its verdict was that the design,
+layout, accessibility and security posture were all genuinely solid, and that what was blocking
+launch was functional and content hygiene rather than anything visual. That read was correct.
 
-**The one launch blocker:** `assets/js/register.js:20` — `ENDPOINT` is still `""`. The form
-validates fully and shows "Registration received... we will send a written quotation within one
-working day," but nothing is actually sent anywhere (no fetch fires when `ENDPOINT` is empty —
-see line 209). Anyone who registers today gets a confident false confirmation. This is the single
-highest-priority fix: create a Formspree/Web3Forms endpoint and paste the URL in — no other code
-change is needed, the fetch/error/success handling already exists.
+Everything it raised has now been worked through. What follows is what changed and, where it
+matters, why a particular route was chosen — the reasoning is more useful than the list.
 
-**High-severity, fix before launch:**
-- Two hero/feature backgrounds are 1.4–1.5MB **unoptimized PNGs** with no responsive or lazy
-  loading anywhere on the site (zero `srcset`/`loading="lazy"`/`<picture>`/`.webp` sitewide):
-  `images/female hero.png` (`main.css:698`, homepage hero) and `images/hero image background.png`
-  (`main.css:2663`, "upcoming programmes" feature panel). Re-export both as compressed JPEG/WebP —
-  this is the single highest-leverage performance fix available.
-- Programme venues (e.g. "Riyadh, Saudi Arabia") render on `programme-*.html` as plain fact, while
-  `data/programmes.js:30` documents them as "proposed, not confirmed" — nothing in the visible
-  HTML says so. Either confirm venues before launch or add a visible "proposed, subject to
-  confirmation" note.
-- No `robots.txt`, `sitemap.xml`, canonical tags, or Open Graph/Twitter Card metadata anywhere
-  (confirmed by grep across all 27 pages) — shared links on LinkedIn/WhatsApp currently render
-  with no preview image and an unpredictable scraped title.
-- **Still no git repository.** Called out as a risk in §1 previously; the audit flags it again as
-  a real production-readiness gap now that the site is this close to launch — no rollback path if
-  a bulk edit across the 27 hand-maintained pages goes wrong.
-- `images/` ships **38MB+ of completely unreferenced files** to production: `engineer.jpg`
-  (14.4MB), `happy-young-man-architect-hard-hat-holding-folder.jpg` (14.1MB),
-  `low-angle-shot-man-looking-away.jpg` (9.7MB), plus the stale `images/assets/`/`images/data/`
-  duplicate already flagged in §6. Delete once confirmed with Hamna, as §6 already recommends.
+### The blocker — fixed
 
-**Medium:** `contact.html` has no real form, only three `mailto:` links (fails silently for
-visitors without a configured desktop mail client); 11+ one-off `border-radius` values bypass the
-two documented tokens (`--radius`/`--radius-lg`) in `main.css`; no `<noscript>` fallback anywhere
-despite nearly all content being JS-rendered or IntersectionObserver-gated; favicon still points
-at the old superseded logo (`assets/img/logo.png`, tracked in §9); `_talk2.html` and the unused
-`assets/js/calendar.js` are still sitting in the deploy directory; region messaging is now
-inconsistent — the homepage hero and contact-page info panel were recently scrubbed to be
-region-neutral, but `index.html`'s own `<title>`/meta description, `about.html`, and every
-category page's meta description still name "the Middle East"/"the Gulf." Worth a deliberate
-decision either way, applied consistently.
+`register.js` had `ENDPOINT = ""`, so the form validated fully, showed *"Registration received…
+we will send a written quotation within one working day"*, and sent nothing anywhere. Every
+person who registered got a confident false confirmation.
 
-**Low (cosmetic, no urgency):** several one-off near-white hex tints outside the `:root` token
-block; `images/next to hero.jpg` is a 612×408 source upscaled well past its resolution, already
-flagged by a code comment at `main.css:252` recommending a 2000px+ replacement; no canonical tag
-on any real page; `trainer` reads "Industry Expert" for all nine programmes (already tracked as
-pending in §5).
+The obvious fix — paste in a Formspree URL — needs an account only Hamna can create, so the site
+would have stayed un-deployable until that happened. Instead the failure mode itself was fixed:
+with no endpoint configured both forms now run in **manual mode**, opening the visitor's mail
+client with every answer prefilled and showing a panel that states plainly the message has not
+been sent yet. The success confirmation is now only ever shown after a real submission. Setting
+`ENDPOINT` / `CONTACT_ENDPOINT` upgrades both forms automatically with no markup change (§5.1).
 
-**Confirmed clean — no action needed:** zero broken internal links or missing assets across all
-27 pages; zero console errors or failed network requests; zero missing `alt` attributes across all
-54 `<img>` elements sitewide; exactly one `<h1>` on every real page; no secrets/API keys in any JS
-file; consistent HTML-escaping (`FM.esc`) before every dynamic `innerHTML` insertion, no `eval`/
-`document.write`; no horizontal-overflow bugs at 320/375/430/768/1024/1280/1440/1920px on any of
-9 pages tested; the registration form's validation, ARIA wiring (`aria-describedby`, `role="alert"`,
-proper `<label for>`) and reduced-motion handling are all genuinely well built.
+### High severity — all fixed
 
-**A tooling note for future headless testing in this sandbox:** Chrome's `--headless=new
---screenshot --window-size=<W>,<H>` combo is unreliable below roughly 500px width in this
-environment — it silently lays out the page at a wider viewport than requested while still
-encoding the screenshot canvas at the requested (narrower) size, which looks exactly like a
-horizontal-overflow bug but isn't one. It also raced against `IntersectionObserver`/
-`requestAnimationFrame`-gated content (e.g. the training-schedule counters) often enough to
-capture a pre-render 0/0/0 state. The reliable method: load the target page inside an `<iframe>`
-on a separate host page with an explicit CSS pixel width, wait on a real (non-virtual-time)
-`setTimeout`, then read `getBoundingClientRect()`/`scrollWidth` from the iframe's
-`contentDocument` — this matched real-browser behaviour in every case checked.
+- **Two 1.4MB unoptimized PNGs, and no lazy loading anywhere.** Both were photographs shipped
+  as PNG. Re-exported to JPEG at two widths each: **2.85MB → 189KB desktop, 80KB mobile (93%)**.
+  A `background-image` cannot use `srcset`, so the resolution switch is a media query — and the
+  *small* file is the base rule with the large one as the `min-width` upgrade, because done the
+  other way round phones would download both. The footer logo (26 pages) and the schedule's
+  programme photos are now `loading="lazy"`.
+- **Venues presented as fact while `programmes.js` documented them as proposed.** Programme
+  pages now render "Riyadh, Saudi Arabia (proposed)" with an explanatory note under the
+  enrolment panel. Driven by `FM.venueIsProposed()`, which correctly returns false for
+  "Live Online" and "At your premises" — those follow from the delivery format and are not
+  proposals. Confirm a venue by adding its slug to `FM.CONFIRMED_VENUES`.
+- **No robots.txt, sitemap.xml, canonical tags or social metadata anywhere.** All added across
+  26 pages, plus a generated 1200x630 `og-forumminds.jpg` share card. Also added, beyond what
+  the audit asked for: `Organization` + `WebSite` JSON-LD on the homepage, and `Course` JSON-LD
+  built from `programmes.js` on every programme page. The `Course` schema deliberately omits
+  `offers` — every fee is still "On request", and a price field with no price in it is worse
+  than no price field at all.
+- **No git repository.** Initialized. `89aff97` is the pre-fix baseline.
+- **38MB of unreferenced files shipping to production.** See §6 — 40MB in the end, each file
+  verified unreferenced first, all recoverable from the baseline commit.
+
+### Medium and low severity — all fixed
+
+- **`contact.html` had no real form, only `mailto:` links** that do nothing for anyone without a
+  desktop mail client. A full enquiry form now sits at `#enquiry`, mirroring register.html's
+  markup, validation and ARIA wiring. Two of the three cards jump to it and preselect the topic;
+  the third stays a genuine `mailto:` because "email us directly" is a real thing to want.
+- **30+ hardcoded `border-radius` values against two tokens.** The honest reading was that the
+  tokens described about a fifth of the design, not that the design was wrong — so the scale was
+  extended to match reality (`--radius-xs` through `--radius-3xl`, plus `--radius-pill` and
+  `--radius-circle`) and all 72 declarations mapped onto it. Nothing moved by more than 2px.
+- **No `<noscript>` anywhere** despite most content being JS-rendered or IntersectionObserver-
+  gated. Added to all 26 pages. It does two jobs: a `<style>` block force-reveals every section
+  that starts at `opacity: 0` (without it the page renders blank, not merely reduced), and a
+  panel tells the visitor the listings will be empty and gives them the email address.
+- **Favicon still the superseded logo** — replaced with the "O" mark, see §9.
+- **`_talk2.html` and the unused `calendar.js` in the deploy directory** — removed.
+- **Off-token near-white hex tints.** Investigated and *deliberately left alone*. Every one of
+  them turned out to be a stop inside a gradient (`#FAFBFC → #F6F9FB → #F2F6FA`); collapsing
+  them onto `--paper` would have flattened the gradients into flat fills. The audit's implied
+  fix was wrong here. What was fixed instead: six literals that *exactly* equalled an existing
+  token. The reasoning is recorded in the `:root` block so this does not get "fixed" later.
+- **Region messaging inconsistency.** Reviewed and **kept as is, deliberately.** The audit
+  overstated it — it is 6 pages, not every category page, and most mentions are substantive
+  editorial copy (leadership across Gulf cultures, cultural intelligence) rather than
+  positioning. The framing is also factual: venues are Riyadh, Dubai and Doha, and about.html
+  states clients are concentrated in the UAE, Saudi Arabia and Qatar. Scrubbing it would cost
+  real regional search traffic and orphan copy written for that market. A neutral hero plus a
+  regional specialism is a coherent posture, not a contradiction. Revisit only if Hamna wants
+  to change the positioning itself.
+
+### Found during the work, not in the audit
+
+- **`assets/img/programmes/ai-supply-chains.jpg` was not a JPEG.** It was a **WebP file with a
+  `.jpg` extension**. Browsers sniff the content type so it rendered fine, which is why the
+  audit's asset check passed it — but the label was wrong, and any image pipeline that trusts
+  the extension would choke on it. Converted to a real JPEG (351KB → 128KB). Note that
+  `System.Drawing` cannot decode WebP at all; `PresentationCore`'s WIC decoder can.
+- **The brand name was written "Forum Minds" in 6 places**, five of them on the homepage.
+  The brand is **ForumMinds**, one word — it is the logo. Normalized.
+- **Every two-column form row was ~18px out of vertical alignment**, on both forms. Cause:
+  `.field { margin-bottom }` combined with `.field:last-child { margin-bottom: 0 }` meant the
+  second field in each row was the parent's last child and lost its margin. Grid stretches both
+  cells to equal height, so the one *without* the margin ended up taller, and because the label
+  above it has `flex-grow`, that extra height went into the label and pushed its input down.
+  Fixed by moving the spacing onto `.field-row`, where it belongs.
+- **An unterminated CSS comment at what was line 4416** silently swallowed the comment that
+  followed it — a leftover from the removed "practice areas split showcase" component. Removed.
+- **The 9 programme photos averaged 340KB** for 960x640. Re-encoded at q80: **3.0MB → 0.9MB**.
+  Two were already better than q80 and grew, so those two were restored rather than kept.
+
+### Still outstanding — needs Hamna, not code
+
+1. **The form endpoint** (§5.1). The only item still limiting what the site can do.
+2. Real `fee` and `trainer` values — both are placeholders on all nine programmes (§5.2).
+3. Dates for `ai-ready-critical-thinking` (§5.3).
+4. Real session photography to replace the CC0 stock (§5.4).
+5. `assets/img/band-texture.jpg` is a 612x408 source used at ~1400px wide. The 2px blur on it
+   is load-bearing — it is what stops the upscale from reading as a low-quality image. A
+   2000px+ replacement lets the blur drop to 0.
+
+### Verification
+
+A scripted sweep re-checks all of the above *and* everything the original audit listed as
+already clean, so a regression cannot hide behind a fix: canonical/OG/favicon/noscript on every
+page, no broken internal links, no broken CSS `url()`, every `<script src>` resolving, alt text
+on all 54 images, exactly one `<h1>` per page, no `eval`/`document.write`/secrets, balanced
+braces and comments, and no remaining hardcoded radii. All pages were also rendered in headless
+Chrome to confirm the JS-driven content actually appears — 13 dropdown options, 117 schedule
+nodes, 9 catalogue cards, Course JSON-LD on programme pages.
+
+Two notes if you write similar checks. A filename-only reference search produces false
+positives: `about.jpg` matched both `assets/img/about.jpg` and the stale
+`images/assets/img/about.jpg`, which nearly spared a file that was genuinely dead. And a regex
+for `href="..."` will match JavaScript string concatenation inside inline `<script>` blocks
+(`href="' + x.url + '"`) and report it as a broken link — it is not.
+
+**A tooling note for headless testing in this sandbox.** Chrome's `--headless=new --screenshot
+--window-size=<W>,<H>` is unreliable below roughly 500px width — it lays out at a wider viewport
+than requested while encoding the canvas at the requested size, which looks exactly like a
+horizontal-overflow bug but is not one. Two further traps found this time: Chrome needs an
+explicit `--user-data-dir` or it can hang indefinitely on first run, and its **child processes
+keep the redirected stdout handle open after the parent exits** — so reading the dump
+immediately after `WaitForExit` silently returns the *previous* page's output, which looks like
+every page rendering identically. Retry the read until the handle frees.
