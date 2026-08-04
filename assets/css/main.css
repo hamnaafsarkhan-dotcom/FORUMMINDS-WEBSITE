@@ -4256,7 +4256,7 @@ a.lw__card { cursor: pointer; }
 .reveal.is-in { opacity: 1; transform: none; }
 
 /* Page-load sequence for the hero: eyebrow, headline, lede, buttons. One
-   staggered fade-up and nothing else � the whole section is a first
+   staggered fade-up and nothing else — the whole section is a first
    impression, and anything that is still moving when the visitor starts
    reading is working against it. The global reduced-motion block below
    switches all of this off. */

@@ -1,0 +1,14 @@
+# ForumMinds — https://forumminds.com
+#
+# The whole site is public marketing content, so everything is crawlable.
+# The two exclusions below are files that exist for humans and old bookmarks
+# rather than for search results.
+
+User-agent: *
+Allow: /
+
+# Redirect stub for the old /calendar.html bookmark. It also carries a
+# noindex tag; this line just saves the crawl.
+Disallow: /calendar.html
+
+Sitemap: https://forumminds.com/sitemap.xml

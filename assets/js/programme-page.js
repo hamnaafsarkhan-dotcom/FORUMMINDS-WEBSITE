@@ -138,4 +138,61 @@
   if (p.startDate) {
     document.title = p.title + " — " + FM.dateRange(p) + " — ForumMinds";
   }
+
+  /* ------------------------------------------------------------------------
+     Course structured data
+
+     Built from programmes.js rather than written into each page, for the same
+     reason the facts above are: a hand-maintained copy would eventually
+     disagree with the calendar. Google reads JSON-LD that JavaScript injects.
+
+     Deliberately omitted: `offers`, because every fee is still "On request" —
+     a price field with no price in it is worse than no price field. Add it
+     here once real pricing exists. `location` names the city only, since the
+     venue is proposed rather than booked (see FM.venueIsProposed).
+     ------------------------------------------------------------------------ */
+  var course = {
+    "@context": "https://schema.org",
+    "@type": "Course",
+    "name": p.title,
+    "description": p.summary,
+    "url": "https://forumminds.com/" + (p.url || "register.html"),
+    "provider": {
+      "@type": "Organization",
+      "name": "ForumMinds",
+      "url": "https://forumminds.com/"
+    },
+    "educationalLevel": p.level,
+    "inLanguage": "en"
+  };
+
+  if (p.image) {
+    course.image = "https://forumminds.com/" + p.image;
+  }
+
+  if (p.startDate) {
+    var mode = p.format === "online" ? "online"
+             : p.format === "in-house" ? "onsite"
+             : "onsite";
+
+    var instance = {
+      "@type": "CourseInstance",
+      "courseMode": mode,
+      "startDate": p.startDate,
+      "endDate": p.endDate || p.startDate,
+      "courseWorkload": "P" + p.days + "D"
+    };
+
+    var where = FM.venueLabel(p);
+    if (where) {
+      instance.location = { "@type": "Place", "name": where };
+    }
+
+    course.hasCourseInstance = instance;
+  }
+
+  var ld = document.createElement("script");
+  ld.type = "application/ld+json";
+  ld.textContent = JSON.stringify(course, null, 2);
+  document.head.appendChild(ld);
 })();
