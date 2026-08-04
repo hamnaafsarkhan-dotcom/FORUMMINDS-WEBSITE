@@ -38,6 +38,33 @@
 
 <a class="skip-link" href="#main">Skip to content</a>
 
+<!-- Without JavaScript, two things break: programme listings are rendered from
+     data/programmes.js so they come up empty, and every scroll-revealed
+     section starts at opacity:0 and never gets the class that fades it in.
+     The <style> below solves the second by force-revealing everything; the
+     panel tells the visitor about the first and gives them a way through. -->
+<noscript>
+  <style>
+    [class*="is-in"], .reveal, .up, .ts, .jr, .why, .dlv, .stats, .disc {
+      opacity: 1 !important;
+      transform: none !important;
+      visibility: visible !important;
+    }
+    .noscript-note {
+      background: var(--gold-tint); border-bottom: 1px solid var(--line);
+      padding: 0.9rem var(--gutter); text-align: center;
+      font-size: var(--t-small); color: var(--ink);
+    }
+    .noscript-note a { color: var(--accent); }
+  </style>
+  <p class="noscript-note">
+    This site uses JavaScript to build its programme listings and training
+    schedule. With JavaScript turned off those sections will be empty &mdash;
+    email <a href="mailto:trainings@forumminds.com">trainings@forumminds.com</a>
+    and we will send you the full schedule.
+  </p>
+</noscript>
+
 <header class="site-header">
   <div class="wrap site-header__inner">
     <a class="brand" href="index.html" aria-label="ForumMinds — home">

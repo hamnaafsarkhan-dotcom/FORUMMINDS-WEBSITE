@@ -82,6 +82,33 @@
 
 <a class="skip-link" href="#main">Skip to content</a>
 
+<!-- Without JavaScript, two things break: programme listings are rendered from
+     data/programmes.js so they come up empty, and every scroll-revealed
+     section starts at opacity:0 and never gets the class that fades it in.
+     The <style> below solves the second by force-revealing everything; the
+     panel tells the visitor about the first and gives them a way through. -->
+<noscript>
+  <style>
+    [class*="is-in"], .reveal, .up, .ts, .jr, .why, .dlv, .stats, .disc {
+      opacity: 1 !important;
+      transform: none !important;
+      visibility: visible !important;
+    }
+    .noscript-note {
+      background: var(--gold-tint); border-bottom: 1px solid var(--line);
+      padding: 0.9rem var(--gutter); text-align: center;
+      font-size: var(--t-small); color: var(--ink);
+    }
+    .noscript-note a { color: var(--accent); }
+  </style>
+  <p class="noscript-note">
+    This site uses JavaScript to build its programme listings and training
+    schedule. With JavaScript turned off those sections will be empty &mdash;
+    email <a href="mailto:trainings@forumminds.com">trainings@forumminds.com</a>
+    and we will send you the full schedule.
+  </p>
+</noscript>
+
 <!-- ============================ HEADER ============================
      Shared across every page. If you change it, change it everywhere.
      The only per-page difference is which link carries aria-current="page".
@@ -292,8 +319,8 @@
 
     <div class="wrap">
       <div class="sec-head">
-        <span class="eyebrow">Why Forum Minds</span>
-        <h2>Why Leading Organisations Choose Forum Minds</h2>
+        <span class="eyebrow">Why ForumMinds</span>
+        <h2>Why Leading Organisations Choose ForumMinds</h2>
         <p class="measure">
           Every programme is built around real business challenges, practical application,
           and measurable organisational impact. We don&rsquo;t just deliver training&mdash;we
@@ -447,7 +474,7 @@
         <div class="closing__body">
           <h2 id="closing-title">Ready to Build Stronger Teams?</h2>
           <p>
-            Partner with Forum Minds to deliver practical, high-impact learning experiences
+            Partner with ForumMinds to deliver practical, high-impact learning experiences
             for your workforce.
           </p>
           <div class="closing__actions">
@@ -559,7 +586,7 @@
         <span class="eyebrow">Trusted worldwide</span>
         <h2 id="lw-title">Trusted by Leading Organisations</h2>
         <p class="measure">
-          Global organisations across the Middle East trust Forum Minds to deliver
+          Global organisations across the Middle East trust ForumMinds to deliver
           executive development, technical capability, and corporate learning
           programmes.
         </p>
@@ -738,7 +765,7 @@
 
             <div class="dlv__more">
               <p class="dlv__desc">
-                Bring Forum Minds directly to your organisation with customised programmes
+                Bring ForumMinds directly to your organisation with customised programmes
                 delivered at your preferred location.
               </p>
               <ul class="dlv__list">

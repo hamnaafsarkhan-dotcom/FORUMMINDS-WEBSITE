@@ -109,8 +109,39 @@
   --max: 1240px;
   --measure: 68ch;
 
+  /* Corner radii.
+     --radius and --radius-lg were the only two tokens, but the file had grown
+     13 distinct hardcoded values (2, 10, 11, 12, 14, 15, 16, 18, 19, 20, 22,
+     24, 26px) on top of them, so the tokens described about a fifth of the
+     actual design. The scale below is the real one, recovered from the values
+     already in use and snapped to a 4px step. Nothing moved by more than 2px;
+     these are the sizes the design was already using, not a redesign.
+
+     Pick by role, not by number: chips and marks (xs), controls and inputs
+     (base), small cards (lg / md), cards (xl), panels (2xl), feature panels
+     (3xl). Add a new hardcoded px value only if none of these fits — and if
+     that happens, the scale is probably wrong rather than the component. */
+  --radius-xs: 2px;
   --radius: 4px;
   --radius-lg: 8px;
+  --radius-md: 12px;      /* absorbed 10, 11, 12 */
+  --radius-xl: 16px;      /* absorbed 14, 15, 16 */
+  --radius-2xl: 20px;     /* absorbed 18, 19, 20 */
+  --radius-3xl: 24px;     /* absorbed 22, 24, 26 */
+
+  /* Shapes rather than steps on the scale — these two are idioms.
+     999px gives a pill whatever the element's height turns out to be. */
+  --radius-pill: 999px;
+  --radius-circle: 50%;
+
+  /* A note on the hex literals further down this file.
+     Roughly fifty remain, and almost all are STOPS INSIDE GRADIENTS — e.g.
+     #FAFBFC -> #F6F9FB -> #F2F6FA. They look like near-duplicates of --paper
+     because that is what they are: a gradient needs values a few units apart,
+     and collapsing them onto one token would flatten it into a flat fill. Those
+     are deliberately literal. What is NOT acceptable is a literal that exactly
+     equals a token (a bare #C9A227 where --gold would do); those have all been
+     replaced. Before adding a hex value below, check which of the two it is. */
 
   --shadow-sm: 0 1px 2px rgba(11, 27, 43, 0.05);
   --shadow-md: 0 4px 16px rgba(11, 27, 43, 0.08);
@@ -172,7 +203,7 @@ li { margin-bottom: 0.4em; }
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
 }
 
 .visually-hidden {
@@ -785,7 +816,7 @@ li { margin-bottom: 0.4em; }
   font-family: var(--hero-sans);
   min-height: 56px;
   padding: 0 32px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   font-size: 1rem;
 }
 
@@ -864,7 +895,7 @@ li { margin-bottom: 0.4em; }
   padding: clamp(1.75rem, 1.2rem + 1.7vw, 2.75rem)
            clamp(1.35rem, 1rem + 0.9vw, 2rem);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 19px;
+  border-radius: var(--radius-2xl);
   /* Top-lit glass: a brighter sheen at the top edge falling away down the
      card, over the navy band showing through. */
   background: linear-gradient(180deg,
@@ -950,7 +981,7 @@ li { margin-bottom: 0.4em; }
   z-index: -1;
   width: 420px; height: 420px;
   margin: -210px 0 0 -210px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   pointer-events: none;
   opacity: 0;
   background: radial-gradient(closest-side,
@@ -1156,7 +1187,7 @@ li { margin-bottom: 0.4em; }
 .why__mote {
   position: absolute; z-index: 0;
   width: 4px; height: 4px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   background: rgba(232, 194, 90, 0.5);
   opacity: 0.22;
   pointer-events: none;
@@ -1179,6 +1210,9 @@ li { margin-bottom: 0.4em; }
   left: -6rem; bottom: -7rem;
   width: 22rem; height: 22rem;
   border: 1px solid rgba(255, 255, 255, 0.05);
+  /* Off the radius scale on purpose: a percentage on a square makes a
+     superellipse-ish blob, which is the point here. A px value would give a
+     rounded rectangle and read as a stray card. */
   border-radius: 30%;
   transform: rotate(18deg);
   pointer-events: none;
@@ -1253,7 +1287,7 @@ li { margin-bottom: 0.4em; }
   display: grid; place-items: center;
   width: 54px; height: 54px;
   margin-bottom: 1.35rem;
-  border-radius: 14px;
+  border-radius: var(--radius-xl);
   border: 1px solid rgba(201, 162, 39, 0.28);
   background: rgba(4, 20, 39, 0.6);
   color: var(--gold-bright);
@@ -1489,7 +1523,7 @@ li { margin-bottom: 0.4em; }
   min-width: 0;
   min-height: clamp(30rem, 25rem + 9vw, 37.5rem);
   border: 1px solid var(--pb, rgba(20, 57, 95, 0.10));
-  border-radius: 24px;
+  border-radius: var(--radius-3xl);
   background: var(--pg, linear-gradient(165deg, #F7FAFD, #ECF2F8));
   box-shadow:
     0 1px 2px rgba(11, 27, 43, 0.04),
@@ -1549,7 +1583,7 @@ li { margin-bottom: 0.4em; }
   display: grid; place-items: center;
   width: 62px; height: 62px;
   margin-bottom: auto;          /* pins the icon to the top, copy to the foot */
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   border: 1px solid var(--pb);
   background: rgba(255, 255, 255, 0.7);
   color: var(--pa);
@@ -1641,7 +1675,7 @@ li { margin-bottom: 0.4em; }
   content: "";
   position: absolute; left: 0; top: 0.52em;
   width: 8px; height: 8px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   border: 2px solid var(--gold);
 }
 .dlv__panel:hover .dlv__list li,
@@ -1657,7 +1691,7 @@ li { margin-bottom: 0.4em; }
   display: inline-flex; align-items: center; gap: 0.55rem;
   padding: 0 1.4rem;
   min-height: 46px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   border: 1px solid rgba(201, 162, 39, 0.5);
   background: var(--white);
   color: var(--accent);
@@ -1700,7 +1734,7 @@ li { margin-bottom: 0.4em; }
   top: 0; left: 0;
   width: 420px; height: 420px;
   margin: -210px 0 0 -210px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   pointer-events: none;
   opacity: 0;
   background: radial-gradient(closest-side,
@@ -1806,7 +1840,7 @@ li { margin-bottom: 0.4em; }
 }
 .lw__glow {
   position: absolute; z-index: 0;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   pointer-events: none;
   filter: blur(70px);
 }
@@ -1911,7 +1945,7 @@ li { margin-bottom: 0.4em; }
      usable size when the card gives the box room to grow into. */
   padding: 16px 20px;
   border: 1px solid var(--lw-border);
-  border-radius: 18px;
+  border-radius: var(--radius-2xl);
   background: var(--white);
   box-shadow:
     0 1px 2px rgba(11, 27, 43, 0.04),
@@ -2039,7 +2073,7 @@ a.lw__card { cursor: pointer; }
   top: 0; left: 0;
   width: 260px; height: 260px;
   margin: -130px 0 0 -130px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   pointer-events: none;
   opacity: 0;
   background: radial-gradient(closest-side,
@@ -2054,7 +2088,7 @@ a.lw__card { cursor: pointer; }
   position: absolute; z-index: 6;
   top: 8px; right: 9px;
   padding: 3px 9px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--white);
   border: 1px solid var(--line);
   color: var(--ink);
@@ -2092,7 +2126,7 @@ a.lw__card { cursor: pointer; }
   position: absolute; z-index: 6;
   left: 50%; bottom: 9px;
   padding: 3px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--white);
   border: 1px solid rgba(201, 162, 39, 0.5);
   color: var(--accent);
@@ -2127,7 +2161,7 @@ a.lw__card { cursor: pointer; }
   padding: clamp(1.4rem, 1.1rem + 1.1vw, 2rem) 1.15rem;
   text-align: center;
   border: 1px solid var(--lw-border);
-  border-radius: 18px;
+  border-radius: var(--radius-2xl);
   background: rgba(255, 255, 255, 0.8);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
@@ -2202,7 +2236,7 @@ a.lw__card { cursor: pointer; }
   grid-template-columns: 55fr 45fr;
   overflow: hidden;
   border: 1px solid rgba(201, 162, 39, 0.30);
-  border-radius: 26px;
+  border-radius: var(--radius-3xl);
   background: linear-gradient(150deg,
     rgba(255, 255, 255, 0.97), rgba(255, 255, 255, 0.88));
   -webkit-backdrop-filter: blur(10px);
@@ -2236,7 +2270,7 @@ a.lw__card { cursor: pointer; }
 .closing__actions .btn {
   min-height: 54px;
   padding: 0 1.9rem;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
 }
 .closing__actions .btn:hover {
   transform: translateY(-2px);
@@ -2411,7 +2445,7 @@ a.lw__card { cursor: pointer; }
   display: inline-flex; align-items: center; gap: 0.65rem;
   padding: 0.6rem 1.15rem;
   border: 1px solid var(--up-edge);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--up-panel);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
@@ -2461,7 +2495,7 @@ a.lw__card { cursor: pointer; }
   display: grid;
   grid-template-columns: 60fr 40fr;
   border: 1.5px solid rgba(110, 170, 235, 0.45);
-  border-radius: 24px;
+  border-radius: var(--radius-3xl);
   background: var(--up-card);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
@@ -2557,7 +2591,7 @@ a.lw__card { cursor: pointer; }
   display: inline-flex; align-items: center;
   padding: 3px 10px;
   border: 1px solid rgba(110, 170, 235, 0.45);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(140, 185, 230, 0.16);
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
@@ -2589,7 +2623,7 @@ a.lw__card { cursor: pointer; }
   display: inline-flex; align-items: baseline; gap: 0.45rem;
   padding: 0.55rem 1rem;
   border: 1px solid rgba(201, 162, 39, 0.38);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.07);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
@@ -2619,13 +2653,13 @@ a.lw__card { cursor: pointer; }
 }
 .up__bar {
   height: 4px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.14);
   overflow: hidden;
 }
 .up__bar span {
   display: block; height: 100%;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: linear-gradient(90deg, var(--gold-bright), var(--gold));
   transform: scaleX(0);
   transform-origin: left center;
@@ -2639,8 +2673,8 @@ a.lw__card { cursor: pointer; }
   margin-top: auto;
   padding: 0 1.75rem;
   min-height: 50px;
-  border-radius: 10px;
-  background: linear-gradient(180deg, #E2B63C 0%, #C9A227 55%, #B8931F 100%);
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, #E2B63C 0%, var(--gold) 55%, #B8931F 100%);
   color: var(--ink);
   font-size: var(--t-small); font-weight: 700;
   letter-spacing: 0.03em;
@@ -2706,7 +2740,7 @@ a.lw__card { cursor: pointer; }
   position: absolute;
   left: 6px; top: 0.5rem; bottom: 0.5rem;
   width: 2px;
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   background: rgba(20, 57, 95, 0.12);
   overflow: hidden;
 }
@@ -2715,7 +2749,7 @@ a.lw__card { cursor: pointer; }
 .up__pulse {
   position: absolute; left: 0; top: 0;
   width: 100%; height: 34%;
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   background: linear-gradient(180deg,
     rgba(201, 162, 39, 0) 0%,
     rgba(201, 162, 39, 0.45) 55%,
@@ -2740,7 +2774,7 @@ a.lw__card { cursor: pointer; }
   gap: clamp(0.85rem, 0.6rem + 1vw, 1.5rem);
   padding: clamp(0.9rem, 0.75rem + 0.6vw, 1.2rem);
   border: 1px solid var(--up-edge);
-  border-radius: 20px;
+  border-radius: var(--radius-2xl);
   background: var(--up-panel);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
@@ -2768,7 +2802,7 @@ a.lw__card { cursor: pointer; }
   top: 50%;
   width: 10px; height: 10px;
   margin-top: -5px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   background: #0E2F3F;
   border: 2px solid rgba(201, 162, 39, 0.65);
   transition: background-color 380ms var(--ease), box-shadow 380ms var(--ease);
@@ -2789,8 +2823,8 @@ a.lw__card { cursor: pointer; }
   min-width: 5.1rem;
   padding: 0.7rem 0.55rem;
   border: 1px solid rgba(90, 145, 205, 0.32);
-  border-radius: 14px;
-  background: linear-gradient(180deg, #FFFFFF 0%, #F9FBFD 100%);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(180deg, var(--white) 0%, #F9FBFD 100%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.95),
     0 4px 12px rgba(10, 35, 55, 0.10);
@@ -2850,7 +2884,7 @@ a.lw__card { cursor: pointer; }
   /* Light family, like the timeline cards — a second dark panel down here
      would compete with the featured card for the eye. */
   border: 1px solid var(--up-edge);
-  border-radius: 20px;
+  border-radius: var(--radius-2xl);
   background: var(--up-panel);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
@@ -2860,7 +2894,7 @@ a.lw__card { cursor: pointer; }
   flex: none;
   display: grid; place-items: center;
   width: 48px; height: 48px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   border: 1px solid rgba(110, 170, 235, 0.45);
   background: rgba(140, 185, 230, 0.16);
   color: var(--up-blue);
@@ -2909,7 +2943,7 @@ a.lw__card { cursor: pointer; }
 }
 .fmt-card li::before {
   content: ""; position: absolute; left: 0; top: 0.55em;
-  width: 7px; height: 7px; border-radius: 50%;
+  width: 7px; height: 7px; border-radius: var(--radius-circle);
   background: var(--gold); opacity: 0.85;
 }
 
@@ -3036,7 +3070,7 @@ a.lw__card { cursor: pointer; }
 }
 .jrn__core, .jrn__halo, .jrn__trail {
   position: absolute; top: 50%; left: 50%;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   transform: translate(-50%, -50%);
 }
 .jrn__core {
@@ -3054,7 +3088,7 @@ a.lw__card { cursor: pointer; }
    motion blur rather than as a second object. */
 .jrn__trail {
   width: 96px; height: 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   transform: translate(-88%, -50%);
   background: linear-gradient(90deg,
     rgba(201, 162, 39, 0) 0%,
@@ -3109,7 +3143,7 @@ a.lw__card { cursor: pointer; }
 .chip-list li {
   margin: 0;
   border: 1px solid var(--line-strong);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 0.45rem 1rem;
   font-size: var(--t-small);
   color: var(--slate);
@@ -3233,7 +3267,7 @@ a.lw__card { cursor: pointer; }
   top: 0; left: 0;
   width: 660px; height: 660px;
   margin: -330px 0 0 -330px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   pointer-events: none;
   opacity: 0;
   background: radial-gradient(closest-side,
@@ -3274,7 +3308,7 @@ a.lw__card { cursor: pointer; }
   display: flex; flex-direction: column;
   padding: clamp(1.6rem, 1.2rem + 1.4vw, 2.2rem);
   border: 1px solid var(--talk-blue);
-  border-radius: 20px;
+  border-radius: var(--radius-2xl);
   background: rgba(255, 255, 255, 0.94);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
@@ -3336,7 +3370,7 @@ a.lw__card { cursor: pointer; }
 
 /* ---- Primary card ------------------------------------------------------- */
 .talk__card--primary {
-  background: linear-gradient(158deg, #14395F 0%, #102F4E 52%, #0B2239 100%);
+  background: linear-gradient(158deg, var(--accent) 0%, #102F4E 52%, #0B2239 100%);
   border-color: rgba(201, 162, 39, 0.34);
   animation: talk-float 7s ease-in-out infinite;
 }
@@ -3385,7 +3419,7 @@ a.lw__card { cursor: pointer; }
   padding: 5px 0;
   text-align: center;
   transform: rotate(45deg);
-  background: linear-gradient(180deg, #E2B63C, #C9A227);
+  background: linear-gradient(180deg, #E2B63C, var(--gold));
   color: var(--ink);
   font-size: 8.5px; font-weight: 700;
   letter-spacing: 0.06em; text-transform: uppercase;
@@ -3401,7 +3435,7 @@ a.lw__card { cursor: pointer; }
   display: grid; place-items: center;
   width: 56px; height: 56px;
   margin-bottom: 1.35rem;
-  border-radius: 15px;
+  border-radius: var(--radius-xl);
   border: 1px solid var(--talk-blue);
   background: rgba(140, 185, 230, 0.12);
   color: var(--accent);
@@ -3424,7 +3458,7 @@ a.lw__card { cursor: pointer; }
 .talk__ico--cal::after {
   content: "";
   position: absolute; inset: -45%; z-index: -1;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   pointer-events: none;
   background: radial-gradient(closest-side, rgba(201, 162, 39, 0.45), transparent 70%);
   opacity: 0;
@@ -3477,7 +3511,7 @@ a.lw__card { cursor: pointer; }
   padding: 0 1.5rem;
   min-height: 48px;
   border: 1px solid var(--talk-blue-hi);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: var(--white);
   color: var(--accent);
   font-size: var(--t-micro); font-weight: 700;
@@ -3508,7 +3542,7 @@ a.lw__card { cursor: pointer; }
 
 .talk__btn--gold {
   border-color: rgba(201, 162, 39, 0.55);
-  background: linear-gradient(180deg, #E2B63C 0%, #C9A227 55%, #B8931F 100%);
+  background: linear-gradient(180deg, #E2B63C 0%, var(--gold) 55%, #B8931F 100%);
   color: var(--ink);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 8px 20px rgba(3, 12, 24, 0.3);
 }
@@ -3642,7 +3676,7 @@ a.lw__card { cursor: pointer; }
 .chip {
   background: var(--white);
   border: 1px solid var(--line-strong);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 0.4rem 0.95rem;
   font-size: var(--t-small); font-weight: 500;
   color: var(--slate);
@@ -3696,7 +3730,7 @@ a.lw__card { cursor: pointer; }
   padding: 3px;
 }
 .view-toggle button {
-  border: 0; background: none; border-radius: 2px;
+  border: 0; background: none; border-radius: var(--radius-xs);
   padding: 0.45rem 1rem; font-size: var(--t-small); font-weight: 600;
   color: var(--slate);
 }
@@ -3735,14 +3769,15 @@ a.lw__card { cursor: pointer; }
 .cal-cell--has .cal-cell__n { color: var(--ink); font-weight: 700; }
 .cal-cell--today .cal-cell__n {
   background: var(--deep); color: var(--white);
-  width: 1.35rem; height: 1.35rem; border-radius: 50%;
+  width: 1.35rem; height: 1.35rem; border-radius: var(--radius-circle);
   display: inline-flex; align-items: center; justify-content: center;
 }
 .cal-ev {
   display: block; text-decoration: none;
   background: var(--gold-tint);
   border-left: 2px solid var(--gold);
-  border-radius: 0 2px 2px 0;
+  /* Square on the left so the gold rule reads as an edge, not a tab. */
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
   padding: 0.22rem 0.35rem;
   font-size: 0.625rem; line-height: 1.25; font-weight: 600;
   color: var(--ink);
@@ -3789,7 +3824,7 @@ a.lw__card { cursor: pointer; }
 .prog-meta span {
   display: inline-flex; align-items: center;
   border: 1px solid var(--deep-line);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 0.35rem 0.9rem;
   background: rgba(255, 255, 255, 0.04);
 }
@@ -3820,7 +3855,7 @@ a.lw__card { cursor: pointer; }
 }
 .tick-list li::before {
   content: ""; position: absolute; left: 0; top: 0.28em;
-  width: 1.1rem; height: 1.1rem; border-radius: 50%;
+  width: 1.1rem; height: 1.1rem; border-radius: var(--radius-circle);
   background: var(--gold-tint);
   border: 1px solid var(--gold);
 }
@@ -3866,7 +3901,7 @@ a.lw__card { cursor: pointer; }
 }
 .facilitator__mark {
   flex: 0 0 3.5rem; width: 3.5rem; height: 3.5rem;
-  border-radius: 50%; background: var(--gold-tint);
+  border-radius: var(--radius-circle); background: var(--gold-tint);
   display: grid; place-items: center; color: var(--accent);
 }
 .facilitator h3 { font-size: 1.1rem; margin-bottom: 0.3rem; }
@@ -3952,11 +3987,28 @@ a.lw__card { cursor: pointer; }
 .field-row .field { display: flex; flex-direction: column; }
 .field-row .field > label { flex: 1 0 auto; }
 
+/* Spacing between rows belongs to the ROW, not to the fields inside it.
+   While .field carried it, the second field in every row was the parent's
+   :last-child and so lost its 1.1rem while the first kept it. Grid stretches
+   both cells to the same height, so the one without the margin ended up
+   taller — and because the label above has flex-grow, that extra height went
+   into the label and pushed its input ~18px lower than its partner's. Every
+   two-column row on both forms was very slightly out of line because of it. */
+.field-row { margin-bottom: 1.1rem; }
+.field-row:last-child { margin-bottom: 0; }
+.field-row .field, .field-row .field:last-child { margin-bottom: 0; }
+
 .field label {
   display: block; font-size: var(--t-small); font-weight: 600;
   color: var(--ink); margin-bottom: 0.4rem;
 }
 .field label .req { color: var(--danger); margin-left: 0.15rem; }
+/* The inverse of .req — marks a field as skippable. Most fields on this site
+   are required, so saying so on every one is noise; naming the exceptions is
+   the shorter signal. */
+.field label .opt {
+  color: var(--slate-soft); font-weight: 400; margin-left: 0.15rem;
+}
 .field .hint {
   display: block; font-size: var(--t-micro); font-weight: 400;
   color: var(--slate-soft); margin-top: 0.15rem;
@@ -4049,7 +4101,7 @@ a.lw__card { cursor: pointer; }
 .form-success.is-shown { display: block; }
 .form-success__mark {
   width: 4.5rem; height: 4.5rem; margin: 0 auto 1.5rem;
-  border-radius: 50%; background: var(--gold-tint);
+  border-radius: var(--radius-circle); background: var(--gold-tint);
   display: grid; place-items: center; color: var(--accent);
 }
 .form-success__recap {
@@ -4145,7 +4197,7 @@ a.lw__card { cursor: pointer; }
 
 /* Footer wordmark — knocked out to white, sitting straight on the dark field.
 
-   The footer is --ink (#0B1B2B) and the artwork is navy, about 1.5:1 against
+   The footer is --ink (var(--ink)) and the artwork is navy, about 1.5:1 against
    it — invisible if placed as-supplied. This used to be solved with a white
    clear-space plate. The plate worked but it read as a sticker: a bright
    rectangle punched into a dark footer, the loudest thing in the section and
@@ -4372,7 +4424,6 @@ a.lw__card { cursor: pointer; }
   }
   .page-head--image { min-height: 0; display: block; }
 
-  /* Split showcase stacks: list above, panel below. Below this width the
   /* Why ForumMinds bento: six tiles drop to two columns, the wide one keeps
      the full width. Single column happens at 640, not here — two columns
      still read comfortably at this width. */
@@ -4591,7 +4642,7 @@ a.lw__card { cursor: pointer; }
    pair of engineering-drawing polylines. All decorative, all aria-hidden. */
 .ts__field { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
 
-.ts__glow { position: absolute; border-radius: 50%; filter: blur(60px); }
+.ts__glow { position: absolute; border-radius: var(--radius-circle); filter: blur(60px); }
 .ts__glow--a {
   width: 46rem; height: 46rem; top: -14rem; left: -10rem;
   background: radial-gradient(circle, rgba(20, 57, 95, 0.13), transparent 68%);
@@ -4635,7 +4686,7 @@ a.lw__card { cursor: pointer; }
   margin-top: clamp(1.75rem, 1rem + 2vw, 2.75rem);
   background: var(--ts-line);
   border: 1px solid var(--ts-line);
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   overflow: hidden;
   box-shadow: var(--ts-shadow-sm);
 }
@@ -4664,7 +4715,7 @@ a.lw__card { cursor: pointer; }
 .ts-stat--status { position: relative; }
 .ts-stat__dot {
   position: absolute; top: 1.35rem; right: 1.35rem;
-  width: 8px; height: 8px; border-radius: 50%;
+  width: 8px; height: 8px; border-radius: var(--radius-circle);
   background: #1E9E6A;
   box-shadow: 0 0 0 0 rgba(30, 158, 106, 0.45);
   animation: ts-live 2.4s ease-out infinite;
@@ -4684,13 +4735,13 @@ a.lw__card { cursor: pointer; }
   margin-top: clamp(1.75rem, 1rem + 2vw, 2.5rem);
   background: var(--white);
   border: 1px solid var(--ts-line);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   box-shadow: 0 12px 30px -16px rgba(11, 27, 43, 0.34), 0 1px 2px rgba(11, 27, 43, 0.05);
 }
 .ts-switch__thumb {
   position: absolute; top: 5px; bottom: 5px; left: 0;
   width: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: linear-gradient(180deg, var(--ts-navy), var(--ts-navy-deep));
   box-shadow: 0 8px 18px -8px rgba(5, 32, 63, 0.7);
   transition: transform 0.35s var(--ts-ease), width 0.35s var(--ts-ease);
@@ -4701,7 +4752,7 @@ a.lw__card { cursor: pointer; }
   display: inline-flex; align-items: center; gap: 0.5rem;
   padding: 0.62rem 1.5rem;
   border: 0; background: transparent;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: var(--t-small); font-weight: 600; letter-spacing: 0.01em;
   color: var(--slate);
   transition: color 0.35s var(--ts-ease);
@@ -4725,7 +4776,7 @@ a.lw__card { cursor: pointer; }
   padding: 0.6rem 2.4rem 0.6rem 1rem;
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid var(--ts-line);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: var(--t-small);
   color: var(--ink);
   box-shadow: var(--shadow-sm);
@@ -4788,7 +4839,7 @@ a.lw__card { cursor: pointer; }
   padding: 1.35rem 1.35rem 1.15rem;
   background: linear-gradient(170deg, rgba(255, 255, 255, 0.96), rgba(248, 251, 255, 0.92));
   border: 1px solid rgba(20, 57, 95, 0.11);
-  border-radius: 20px;
+  border-radius: var(--radius-2xl);
   box-shadow: var(--ts-shadow);
   backdrop-filter: blur(10px);
 }
@@ -4804,7 +4855,7 @@ a.lw__card { cursor: pointer; }
   display: inline-flex; align-items: center; justify-content: center;
   width: 32px; height: 32px;
   border: 1px solid var(--ts-line);
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   background: var(--white);
   color: var(--accent);
   transition: transform 0.3s var(--ts-ease), border-color 0.3s var(--ts-ease),
@@ -4849,7 +4900,7 @@ a.lw__card { cursor: pointer; }
   display: flex; flex-direction: column;
   align-items: center; justify-content: center; gap: 3px;
   border: 0; background: transparent;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   font-family: var(--sans);
   font-size: 0.9rem; font-weight: 500;
   color: var(--slate);
@@ -4864,7 +4915,7 @@ a.lw__card { cursor: pointer; }
 .ts-day::before {
   content: "";
   position: absolute; inset: 8%;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   background: radial-gradient(circle, rgba(20, 57, 95, 0.22), rgba(20, 57, 95, 0.06) 70%);
   opacity: 0;
   transform: scale(0.55);
@@ -4874,7 +4925,7 @@ a.lw__card { cursor: pointer; }
 .ts-day.is-today::after {
   content: "";
   position: absolute; inset: 8%;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   border: 1.5px solid rgba(20, 57, 95, 0.42);
 }
 
@@ -4884,7 +4935,7 @@ a.lw__card { cursor: pointer; }
   display: flex; gap: 3px; height: 5px; align-items: center;
 }
 .ts-day__dots i {
-  width: 5px; height: 5px; border-radius: 50%;
+  width: 5px; height: 5px; border-radius: var(--radius-circle);
   background: var(--ts-navy);
   box-shadow: 0 0 7px rgba(20, 57, 95, 0.55);
   opacity: 0;
@@ -4947,11 +4998,11 @@ a.lw__card { cursor: pointer; }
 }
 .ts-cal__key-item { display: inline-flex; align-items: center; gap: 0.45rem; }
 .ts-key-dot {
-  width: 6px; height: 6px; border-radius: 50%;
+  width: 6px; height: 6px; border-radius: var(--radius-circle);
   background: var(--ts-navy); box-shadow: 0 0 6px rgba(20, 57, 95, 0.5);
 }
 .ts-key-ring {
-  width: 10px; height: 10px; border-radius: 50%;
+  width: 10px; height: 10px; border-radius: var(--radius-circle);
   border: 1.5px solid rgba(20, 57, 95, 0.45);
 }
 .ts-cal__request {
@@ -4967,7 +5018,7 @@ a.lw__card { cursor: pointer; }
   display: inline-block;
   padding: 0.3rem 0.7rem;
   border: 1px solid var(--ts-line);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--white);
   font-size: 0.72rem; font-weight: 600;
   color: var(--accent); text-decoration: none;
@@ -4981,7 +5032,7 @@ a.lw__card { cursor: pointer; }
   position: relative;
   background: var(--white);
   border: 1px solid rgba(20, 57, 95, 0.09);
-  border-radius: 22px;
+  border-radius: var(--radius-3xl);
   overflow: hidden;
   box-shadow: var(--ts-shadow);
 }
@@ -5020,7 +5071,7 @@ a.lw__card { cursor: pointer; }
   padding: 0.4rem 0.85rem;
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(8px);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   box-shadow: var(--shadow-md);
   font-size: var(--t-small); font-weight: 600;
   color: var(--ink);
@@ -5103,7 +5154,7 @@ a.lw__card { cursor: pointer; }
 .ts-feature__page {
   display: inline-flex; align-items: center; justify-content: center;
   width: 26px; height: 26px;
-  border: 1px solid var(--ts-line); border-radius: 50%;
+  border: 1px solid var(--ts-line); border-radius: var(--radius-circle);
   background: var(--white); color: var(--accent);
   transition: border-color 0.3s var(--ts-ease), transform 0.3s var(--ts-ease);
 }
@@ -5126,7 +5177,7 @@ a.lw__card { cursor: pointer; }
   padding: 1rem 1.25rem;
   background: rgba(255, 255, 255, 0.86);
   border: 1px solid var(--ts-line-soft);
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-sm);
   transition: transform 0.35s var(--ts-ease), box-shadow 0.35s var(--ts-ease),
               border-color 0.35s var(--ts-ease), background-color 0.35s var(--ts-ease);
@@ -5151,7 +5202,7 @@ a.lw__card { cursor: pointer; }
   padding: 0.5rem 0.35rem;
   background: linear-gradient(180deg, rgba(20, 57, 95, 0.07), rgba(20, 57, 95, 0.03));
   border: 1px solid var(--ts-line-soft);
-  border-radius: 11px;
+  border-radius: var(--radius-md);
   line-height: 1.1;
 }
 .ts-row__day {
@@ -5198,7 +5249,7 @@ a.lw__card { cursor: pointer; }
   display: inline-flex; align-items: center; gap: 0.45rem;
   padding: 0.55rem 1.05rem;
   border: 1px solid var(--ts-line);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--white);
   font-size: var(--t-small); font-weight: 600;
   color: var(--accent); text-decoration: none;
@@ -5219,7 +5270,7 @@ a.lw__card { cursor: pointer; }
   text-align: center;
   background: rgba(255, 255, 255, 0.8);
   border: 1px dashed var(--line-strong);
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
 }
 
 .ts-foot {
