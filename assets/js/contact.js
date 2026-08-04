@@ -4,16 +4,14 @@
    it off to email.
 
    ---------------------------------------------------------------------------
-   SUBMISSIONS ARE LIVE (endpoint configured 2026-08-05)
+   SUBMISSIONS ARE LIVE (own Formspree form since 2026-08-05)
    ---------------------------------------------------------------------------
-   This is the SAME Formspree form register.js posts to, so enquiries and
-   delegate registrations share one inbox and one 50-per-month free-tier quota.
-   Each submission sets its own `_subject` so the two are still tellable apart
-   at a glance — enquiries read "Enquiry — <topic>", registrations read
-   "Registration — <programme>".
-
-   To split them later, create a second Formspree form and change the URL here
-   only; nothing else needs touching.
+   This has its OWN Formspree form, separate from register.js's. The two
+   started out sharing one form; this was split off so registrations and
+   general enquiries land as distinct entries in Formspree's dashboard rather
+   than one shared 50-per-month quota. Both still land in the same inbox
+   (trainings@forumminds.com), and each submission still sets its own
+   `_subject` ("Enquiry — <topic>") so they read clearly there too.
 
    IF THE ENDPOINT IS EVER CLEARED, the form falls back to MANUAL MODE: it
    opens the visitor's mail client with the message prefilled and says plainly
@@ -21,7 +19,7 @@
    none was.
    ========================================================================== */
 
-var CONTACT_ENDPOINT = "https://formspree.io/f/mbgrrqnz";
+var CONTACT_ENDPOINT = "https://formspree.io/f/xwleeyvo";
 
 (function () {
   "use strict";

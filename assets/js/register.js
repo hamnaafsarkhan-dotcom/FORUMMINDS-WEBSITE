@@ -4,19 +4,18 @@
    confirmation panel.
 
    ---------------------------------------------------------------------------
-   SUBMISSIONS ARE LIVE (endpoint configured 2026-08-05)
+   SUBMISSIONS ARE LIVE (own Formspree form since 2026-08-05)
    ---------------------------------------------------------------------------
    Registrations POST to the Formspree form below and arrive by email at the
    address that form is verified against (trainings@forumminds.com).
 
-   contact.js posts to the SAME Formspree form, so both the registration form
-   and the contact-page enquiry form land in one inbox. That is why each
-   submission sets its own `_subject` before sending — without it the two are
-   indistinguishable at a glance in the inbox. If they are ever split onto two
-   Formspree forms, the _subject lines can stay as they are.
-
-   Formspree's free tier allows 50 submissions per month across the form.
-   If registrations start being missed, that limit is the first thing to check.
+   This has its own Formspree form, separate from contact.js's — the two
+   briefly shared one form and were split so registrations and general
+   enquiries land as distinct entries in Formspree's dashboard, each with
+   their own 50-submissions/month free-tier quota, rather than competing for
+   one. Both still land in the same inbox. The `_subject` line below still
+   sets itself per submission ("Registration — <programme>"), which is no
+   longer needed to tell the two apart but is harmless to keep.
 
    IF THE ENDPOINT IS EVER CLEARED, the form falls back to MANUAL MODE: it
    opens the delegate's mail client with every answer prefilled and shows the

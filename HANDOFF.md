@@ -158,14 +158,15 @@ logos/                              Client/partner logos for the logo wall (ADNO
 
 ## 5. Pending / not yet real
 
-1. **~~No form endpoint~~ — RESOLVED 2026-08-05.** Both forms POST to Formspree
-   `https://formspree.io/f/mbgrrqnz`:
-   - `assets/js/register.js` → `var ENDPOINT`
-   - `assets/js/contact.js` → `var CONTACT_ENDPOINT`
+1. **~~No form endpoint~~ — RESOLVED 2026-08-05, then split into two forms the same day.** Each form has its own Formspree endpoint:
+   - `assets/js/register.js` → `var ENDPOINT = "https://formspree.io/f/mbgrrqnz"`
+   - `assets/js/contact.js` → `var CONTACT_ENDPOINT = "https://formspree.io/f/xwleeyvo"`
+
+   They started out sharing one Formspree form; that was split so registrations and general enquiries show as distinct entries in Formspree's dashboard and each draw on their own **50 submissions/month** free-tier quota rather than competing for one. Both still land in the same inbox (`trainings@forumminds.com`).
 
    Things worth knowing about that setup:
 
-   - **Both forms share one Formspree form**, so registrations and general enquiries arrive in the same inbox and draw on the same **50 submissions/month** free-tier quota. Each submission therefore sets its own `_subject` — registrations read `Registration — <programme title>`, enquiries read `Enquiry — <topic>` — so they are tellable apart at a glance. To split them, create a second Formspree form and change the URL in `contact.js` only.
+   - **Each submission sets its own `_subject`** — registrations read `Registration — <programme title>`, enquiries read `Enquiry — <topic>`. No longer needed to tell them apart (they're separate forms now), but harmless and left in place — it also makes the inbox itself easy to scan.
    - **Both set `_replyto`** to the visitor's address, so hitting Reply on the notification goes to them rather than to Formspree.
    - **`register.js` enriches the payload before sending.** The `<option>` values are slugs, so a raw post would read `programme: strategic-hr` with no dates or venue. It appends `Programme title`, `Programme dates` and `Programme venue` (carrying the "(proposed)" qualifier) resolved from `programmes.js` at submit time, so the email is readable without a lookup.
    - **The endpoint URL is not a secret.** It is a public write-only submission address, designed to sit in client-side JS. There is nothing to protect here.
