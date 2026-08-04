@@ -4,26 +4,29 @@
    confirmation panel.
 
    ---------------------------------------------------------------------------
-   IMPORTANT — NO SUBMISSION ENDPOINT IS CONFIGURED YET
+   SUBMISSIONS ARE LIVE (endpoint configured 2026-08-05)
    ---------------------------------------------------------------------------
-   To start receiving registrations automatically:
+   Registrations POST to the Formspree form below and arrive by email at the
+   address that form is verified against (trainings@forumminds.com).
 
-     1. Create a free form at https://formspree.io or https://web3forms.com
-     2. Copy the endpoint URL they give you.
-     3. Paste it into ENDPOINT below, replacing the empty string.
+   contact.js posts to the SAME Formspree form, so both the registration form
+   and the contact-page enquiry form land in one inbox. That is why each
+   submission sets its own `_subject` before sending — without it the two are
+   indistinguishable at a glance in the inbox. If they are ever split onto two
+   Formspree forms, the _subject lines can stay as they are.
 
-   That single change switches the form from manual mode to live. The submit
-   handler already does the fetch, the error handling and the success state.
+   Formspree's free tier allows 50 submissions per month across the form.
+   If registrations start being missed, that limit is the first thing to check.
 
-   UNTIL THEN the form runs in MANUAL MODE: on submit it opens the delegate's
-   mail client with every answer prefilled and shows the #form-manual panel,
-   which states plainly that nothing has been sent yet. It deliberately does
-   NOT show the "Registration received" confirmation — telling someone we have
-   their booking when no booking reached us is worse than having no form.
-   Setting ENDPOINT is what makes that confirmation truthful.
+   IF THE ENDPOINT IS EVER CLEARED, the form falls back to MANUAL MODE: it
+   opens the delegate's mail client with every answer prefilled and shows the
+   #form-manual panel, which states plainly that nothing has been sent yet. It
+   deliberately does NOT show the "Registration received" confirmation —
+   telling someone we have their booking when no booking reached us is worse
+   than having no form at all.
    ========================================================================== */
 
-var ENDPOINT = "";   /* <-- paste your Formspree / Web3Forms URL here */
+var ENDPOINT = "https://formspree.io/f/mbgrrqnz";
 
 (function () {
   "use strict";
@@ -223,10 +226,35 @@ var ENDPOINT = "";   /* <-- paste your Formspree / Web3Forms URL here */
     submitBtn.disabled = true;
     submitBtn.textContent = "Sending…";
 
+    /* The raw form posts the programme SLUG ("strategic-hr"), because that is
+       what the <option> values carry. Sent as-is, the notification email reads
+       "programme: strategic-hr" with no dates and no venue, and someone has to
+       go and look it up. These extra fields resolve it to the real title and
+       schedule at submit time, so the email is readable on its own.
+
+       Underscore-prefixed names are Formspree's own: _subject sets the email
+       subject line. Everything else just appears as a labelled row. */
+    var data = new FormData(form);
+    var chosen = FM.find(form.elements.programme.value);
+
+    data.append("_subject",
+      "Registration — " + (chosen ? chosen.title : "programme to be confirmed"));
+
+    /* Makes Reply in the notification email go to the delegate rather than to
+       Formspree, so a quotation can be sent straight back. */
+    data.append("_replyto", form.elements.email.value.trim());
+
+    if (chosen) {
+      data.append("Programme title", chosen.title);
+      data.append("Programme dates", FM.dateRange(chosen));
+      data.append("Programme venue", chosen.venue +
+        (FM.venueIsProposed(chosen) ? " (proposed)" : ""));
+    }
+
     fetch(ENDPOINT, {
       method: "POST",
       headers: { "Accept": "application/json" },
-      body: new FormData(form)
+      body: data
     })
       .then(function (res) {
         if (!res.ok) { throw new Error("Request failed: " + res.status); }

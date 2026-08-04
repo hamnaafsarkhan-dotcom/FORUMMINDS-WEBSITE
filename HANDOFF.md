@@ -158,14 +158,20 @@ logos/                              Client/partner logos for the logo wall (ADNO
 
 ## 5. Pending / not yet real
 
-1. **⚠️ THE ONE THING STILL BLOCKING A FULLY-FUNCTIONING LAUNCH: no form endpoint.**
-   Two variables, both currently `""`:
-   - `assets/js/register.js` → `var ENDPOINT = "";`
-   - `assets/js/contact.js` → `var CONTACT_ENDPOINT = "";`
+1. **~~No form endpoint~~ — RESOLVED 2026-08-05.** Both forms POST to Formspree
+   `https://formspree.io/f/mbgrrqnz`:
+   - `assets/js/register.js` → `var ENDPOINT`
+   - `assets/js/contact.js` → `var CONTACT_ENDPOINT`
 
-   Create one form at [formspree.io](https://formspree.io) or [web3forms.com](https://web3forms.com) and paste the same URL into both. That single change switches both forms from manual mode to live; the fetch, error handling and success states already exist.
+   Things worth knowing about that setup:
 
-   **The site is safe to deploy before that happens.** It used to say "Registration received… we will send a written quotation within one working day" while sending nothing at all — a confident false confirmation to every person who registered. That is fixed. With no endpoint set, both forms now run in **manual mode**: they open the visitor's mail client with every answer prefilled and show a panel that says outright the message *has not been sent yet*, with the address to use if no mail client opens. It is a worse experience than a real endpoint; it is not a dishonest one. Setting the endpoint is what makes the success confirmation truthful, so do it before launch if you can.
+   - **Both forms share one Formspree form**, so registrations and general enquiries arrive in the same inbox and draw on the same **50 submissions/month** free-tier quota. Each submission therefore sets its own `_subject` — registrations read `Registration — <programme title>`, enquiries read `Enquiry — <topic>` — so they are tellable apart at a glance. To split them, create a second Formspree form and change the URL in `contact.js` only.
+   - **Both set `_replyto`** to the visitor's address, so hitting Reply on the notification goes to them rather than to Formspree.
+   - **`register.js` enriches the payload before sending.** The `<option>` values are slugs, so a raw post would read `programme: strategic-hr` with no dates or venue. It appends `Programme title`, `Programme dates` and `Programme venue` (carrying the "(proposed)" qualifier) resolved from `programmes.js` at submit time, so the email is readable without a lookup.
+   - **The endpoint URL is not a secret.** It is a public write-only submission address, designed to sit in client-side JS. There is nothing to protect here.
+   - **Clearing either variable restores manual mode** — the mail-client handoff with the "not sent yet" panel. That fallback is still in the code and still correct; it is what makes the site safe to deploy even if the Formspree account lapses.
+
+   Verified end to end by stubbing `fetch()` in a headless browser, filling both forms and submitting: the live branch fires, posts the expected fields, shows the success panel and leaves the manual panel hidden.
 
 2. **Three placeholder fields throughout `data/programmes.js`,** flagged in that file's own header comment:
    - `venue` — city venues are proposed, not confirmed (only "Live Online" entries are certain). This is now *visible to the visitor*: programme pages render the venue as "Riyadh, Saudi Arabia (proposed)" plus a note under the enrolment panel. To confirm a venue, replace the string and add the slug to `FM.CONFIRMED_VENUES` in `data/programmes.js` — the qualifier disappears for that programme only.
@@ -479,7 +485,7 @@ been sent yet. The success confirmation is now only ever shown after a real subm
 
 ### Still outstanding — needs Hamna, not code
 
-1. **The form endpoint** (§5.1). The only item still limiting what the site can do.
+1. ~~The form endpoint~~ — **done 2026-08-05**, both forms are live on Formspree (§5.1).
 2. Real `fee` and `trainer` values — both are placeholders on all nine programmes (§5.2).
 3. Dates for `ai-ready-critical-thinking` (§5.3).
 4. Real session photography to replace the CC0 stock (§5.4).

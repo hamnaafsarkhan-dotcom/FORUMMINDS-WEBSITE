@@ -4,20 +4,24 @@
    it off to email.
 
    ---------------------------------------------------------------------------
-   NO SUBMISSION ENDPOINT IS CONFIGURED YET
+   SUBMISSIONS ARE LIVE (endpoint configured 2026-08-05)
    ---------------------------------------------------------------------------
-   Same switch as register.js, and it should be pointed at the same place:
+   This is the SAME Formspree form register.js posts to, so enquiries and
+   delegate registrations share one inbox and one 50-per-month free-tier quota.
+   Each submission sets its own `_subject` so the two are still tellable apart
+   at a glance — enquiries read "Enquiry — <topic>", registrations read
+   "Registration — <programme>".
 
-     1. Create a free form at https://formspree.io or https://web3forms.com
-     2. Copy the endpoint URL they give you.
-     3. Paste it into ENDPOINT below, replacing the empty string.
+   To split them later, create a second Formspree form and change the URL here
+   only; nothing else needs touching.
 
-   Until then the form runs in MANUAL MODE: it opens the visitor's mail client
-   with the message prefilled and says plainly that nothing has been sent yet.
-   It never claims an enquiry was received when none was.
+   IF THE ENDPOINT IS EVER CLEARED, the form falls back to MANUAL MODE: it
+   opens the visitor's mail client with the message prefilled and says plainly
+   that nothing has been sent yet. It never claims an enquiry was received when
+   none was.
    ========================================================================== */
 
-var CONTACT_ENDPOINT = "";   /* <-- paste your Formspree / Web3Forms URL here */
+var CONTACT_ENDPOINT = "https://formspree.io/f/mbgrrqnz";
 
 (function () {
   "use strict";
@@ -149,10 +153,17 @@ var CONTACT_ENDPOINT = "";   /* <-- paste your Formspree / Web3Forms URL here */
     submitBtn.disabled = true;
     submitBtn.textContent = "Sending…";
 
+    /* _subject is Formspree's own field — it sets the email subject line, so
+       an enquiry is distinguishable from a registration in a shared inbox.
+       _replyto makes Reply go to the visitor rather than to Formspree. */
+    var data = new FormData(form);
+    data.append("_subject", "Enquiry — " + (val("topic") || "ForumMinds website"));
+    data.append("_replyto", val("email"));
+
     fetch(CONTACT_ENDPOINT, {
       method: "POST",
       headers: { "Accept": "application/json" },
-      body: new FormData(form)
+      body: data
     })
       .then(function (res) {
         if (!res.ok) { throw new Error("Request failed: " + res.status); }
