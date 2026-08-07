@@ -11,6 +11,7 @@ Build started 2026-07-29. Plain HTML/CSS/JS, **no build step, no npm, no framewo
 ## 1. How to work on this site
 
 - Open any `.html` file directly in a browser (`file://`) — nothing needs a server. If you add fetch-based features later, you'll need `python -m http.server` or similar because `file://` blocks fetch.
+- **Exception: `register.html`'s form now needs PHP**, not just a static server — see §5.1. `python -m http.server` will serve `register-handler.php` as plain text instead of running it. Use `php -S localhost:8000` (or any PHP-capable host) to test the form end to end.
 - There is **no package.json, no bundler, no linter**. Don't introduce one unless asked — that's a deliberate constraint (Hamna doesn't want a build step to maintain).
 - Git is initialized locally with no remote. If Hamna wants this on GitHub, `git remote add origin <url>` and push — the history is already meaningful (one commit per audit section).
 - **Image work has no CLI tooling here.** There is no ImageMagick, no Node, no working Python in this environment. Resizing and re-encoding was done with PowerShell + `System.Drawing`, and WebP decoding needs `PresentationCore`'s WIC decoder instead (`System.Drawing` cannot read WebP at all). Working scripts are described in §10.
@@ -34,6 +35,13 @@ calendar.html                       Redirect stub only. The page moved to
                                      links still land somewhere. Carries noindex + an absolute
                                      canonical, and is excluded from sitemap.xml and robots.txt.
                                      Safe to delete if you add a 301 at the host instead.
+
+register-handler.php                Backend for register.html: validates the POST server-side
+                                     and appends a backup row to registrations.csv. See §5.1.
+registrations.csv                   Backup of every registration, written by register-handler.php.
+                                     Gitignored (delegate PII) and blocked from direct web access
+                                     by .htaccess. Does not exist until the first live submission.
+.htaccess                           Denies direct requests to registrations.csv.
 
 robots.txt                          Allows everything except the calendar.html stub; points
                                      at the sitemap.
@@ -158,21 +166,35 @@ logos/                              Client/partner logos for the logo wall (ADNO
 
 ## 5. Pending / not yet real
 
-1. **~~No form endpoint~~ — RESOLVED 2026-08-05, then split into two forms the same day.** Each form has its own Formspree endpoint:
-   - `assets/js/register.js` → `var ENDPOINT = "https://formspree.io/f/mbgrrqnz"`
-   - `assets/js/contact.js` → `var CONTACT_ENDPOINT = "https://formspree.io/f/xwleeyvo"`
+1. **~~No form endpoint~~ — RESOLVED 2026-08-05.** `register.html` and `contact.html` now use two different mechanisms:
 
-   They started out sharing one Formspree form; that was split so registrations and general enquiries show as distinct entries in Formspree's dashboard and each draw on their own **50 submissions/month** free-tier quota rather than competing for one. Both still land in the same inbox (`trainings@forumminds.com`).
+   - **`assets/js/contact.js`** → still Formspree, `var CONTACT_ENDPOINT = "https://formspree.io/f/xwleeyvo"`. Submissions arrive by email at `trainings@forumminds.com`, `_subject`/`_replyto` set per submission.
+   - **`assets/js/register.js`** → switched the same day, later on 2026-08-05, to a self-hosted PHP handler instead of Formspree: `var ENDPOINT = "register-handler.php"`. Registrations now:
+     1. Are validated again server-side by `register-handler.php` (mirrors the client-side `RULES` in `register.js` — keep both in sync if a field changes).
+     2. Get appended as a backup row to `registrations.csv` (root directory, gitignored — it holds delegate PII and must never be committed or web-accessible).
+   - **`.htaccess`** in the root denies direct requests to `registrations.csv`, so it can't be fetched by guessing the URL — on top of it being outside git entirely.
+   - **`register.js` still enriches the payload before sending.** The `<option>` values are slugs, so a raw post would read `programme: strategic-hr` with no dates or venue. It appends `programme_title`, `programme_dates` and `programme_venue` (carrying the "(proposed)" qualifier) resolved from `programmes.js` at submit time; `register-handler.php` uses these for a readable CSV row, falling back to the raw slug if they're absent.
 
-   Things worth knowing about that setup:
+     **Those three names must stay lowercase-with-underscores on both sides.** PHP rewrites spaces in incoming field names to underscores, so a field posted as `Programme title` arrives as `$_POST['Programme_title']` — the first cut of this used the spaced names on both sides and the handler read empty strings for all three, silently falling back to the slug on every registration. Underscored names remove the trap instead of compensating for it.
+   - **The handler always returns JSON** (`{ success, message }`); `register.js` shows `message` in the error panel on failure rather than a generic string, so a validation miss server-side is legible to the delegate instead of just "something went wrong." If the body will not parse as JSON at all (PHP not enabled on the host, a 500 page, a captive portal), the parser's own message is swallowed and the generic wording is used — `Unexpected token '<'` is not something to put in front of a delegate.
+   - **Spam gate**, two silent checks in `register-handler.php` (§5.1a below). The form is public, so nothing stops an automated script from posting to it directly and filling the CSV with junk rows.
+   - **Clearing `ENDPOINT`** (either form) restores manual mode — the mail-client handoff with the "not sent yet" panel. That fallback is still in the code and still correct; it is what makes the site safe to deploy even if the Formspree account lapses or `register-handler.php` isn't reachable yet.
+   - **No WhatsApp/CallMeBot integration.** An earlier draft of this handler sent an instant WhatsApp notification via CallMeBot on every registration. Removed 2026-08-07 at Hamna's request before it ever went live — the CSV backup is the only record now. `config.php` (which held the CallMeBot phone number and API key) has been deleted; nothing references it any more.
 
-   - **Each submission sets its own `_subject`** — registrations read `Registration — <programme title>`, enquiries read `Enquiry — <topic>`. No longer needed to tell them apart (they're separate forms now), but harmless and left in place — it also makes the inbox itself easy to scan.
-   - **Both set `_replyto`** to the visitor's address, so hitting Reply on the notification goes to them rather than to Formspree.
-   - **`register.js` enriches the payload before sending.** The `<option>` values are slugs, so a raw post would read `programme: strategic-hr` with no dates or venue. It appends `Programme title`, `Programme dates` and `Programme venue` (carrying the "(proposed)" qualifier) resolved from `programmes.js` at submit time, so the email is readable without a lookup.
-   - **The endpoint URL is not a secret.** It is a public write-only submission address, designed to sit in client-side JS. There is nothing to protect here.
-   - **Clearing either variable restores manual mode** — the mail-client handoff with the "not sent yet" panel. That fallback is still in the code and still correct; it is what makes the site safe to deploy even if the Formspree account lapses.
+   ### 5.1a The spam gate
 
-   Verified end to end by stubbing `fetch()` in a headless browser, filling both forms and submitting: the live branch fires, posts the expected fields, shows the success panel and leaves the manual panel hidden.
+   Two hidden fields in `register.html`, both checked by `register-handler.php`:
+
+   - `website` — a **honeypot**, positioned off-screen (deliberately *not* `display:none`, which some bots skip), `aria-hidden`, `tabindex="-1"`. A human never meets it, so anything in it came from something filling in every input it found.
+   - `t` — `register.js` stamps `Date.now()` into it at page load. A post arriving under three seconds later is a bot.
+
+   Both rejections are **silent**: the response is byte-identical to a real success, so a bot cannot tell which check caught it and tune around it. Rejections are recorded in the server error log.
+
+   The time check only fires in the **0–3s window**. A missing `t` means the JS did not run — a broken page, not a bot — and a *negative* elapsed time means the delegate's clock disagrees with the server's (or a 32-bit PHP build overflowed the millisecond value). Neither discards the registration. Silently dropping a real booking is a much worse failure than letting a bot through.
+
+   **Not yet verified end to end.** There is no PHP binary in this environment, so the handler has never been executed — not even syntax-checked. Before launch, run it once against `php -S localhost:8000` (§1) and submit the form: confirm a `registrations.csv` appears with a header row, that a bad email returns the "Please check:" panel, and that the honeypot path returns success without writing a row.
+
+   Two host requirements worth checking before deploying: the handler needs **mbstring** (`mb_strlen`/`mb_substr`), and `.htaccess` is only read by **Apache or LiteSpeed** — on Nginx the CSV is not protected, and the deny rule must be translated into the server config by hand.
 
 2. **Three placeholder fields throughout `data/programmes.js`,** flagged in that file's own header comment:
    - `venue` — city venues are proposed, not confirmed (only "Live Online" entries are certain). This is now *visible to the visitor*: programme pages render the venue as "Riyadh, Saudi Arabia (proposed)" plus a note under the enrolment panel. To confirm a venue, replace the string and add the slug to `FM.CONFIRMED_VENUES` in `data/programmes.js` — the qualifier disappears for that programme only.

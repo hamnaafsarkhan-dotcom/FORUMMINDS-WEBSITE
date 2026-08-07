@@ -4,18 +4,12 @@
    confirmation panel.
 
    ---------------------------------------------------------------------------
-   SUBMISSIONS ARE LIVE (own Formspree form since 2026-08-05)
+   SUBMISSIONS ARE LIVE (own PHP handler since 2026-08-05)
    ---------------------------------------------------------------------------
-   Registrations POST to the Formspree form below and arrive by email at the
-   address that form is verified against (trainings@forumminds.com).
-
-   This has its own Formspree form, separate from contact.js's — the two
-   briefly shared one form and were split so registrations and general
-   enquiries land as distinct entries in Formspree's dashboard, each with
-   their own 50-submissions/month free-tier quota, rather than competing for
-   one. Both still land in the same inbox. The `_subject` line below still
-   sets itself per submission ("Registration — <programme>"), which is no
-   longer needed to tell the two apart but is harmless to keep.
+   Registrations POST to register-handler.php, which validates them again
+   server-side and appends a backup row to registrations.csv. The handler
+   always replies with JSON — { success: true/false, message: "..." } —
+   which is what confirmSuccess()/the catch block below act on.
 
    IF THE ENDPOINT IS EVER CLEARED, the form falls back to MANUAL MODE: it
    opens the delegate's mail client with every answer prefilled and shows the
@@ -25,7 +19,7 @@
    than having no form at all.
    ========================================================================== */
 
-var ENDPOINT = "https://formspree.io/f/mbgrrqnz";
+var ENDPOINT = "register-handler.php";
 
 (function () {
   "use strict";
@@ -38,6 +32,13 @@ var ENDPOINT = "https://formspree.io/f/mbgrrqnz";
   var success = document.getElementById("form-success");
   var manual = document.getElementById("form-manual");
   var submitBtn = document.getElementById("form-submit");
+
+  /* Half of the spam gate (see the comment on the hidden fields in
+     register.html): the handler rejects a post that arrives less than three
+     seconds after the page loaded. Stamped here rather than in the markup so
+     it reflects the load, not the cache. */
+  var stamp = document.getElementById("form-stamp");
+  if (stamp) { stamp.value = String(Date.now()); }
 
   /* ------------------------------------------------------------------------
      Populate the programme dropdown from data/programmes.js
@@ -226,27 +227,23 @@ var ENDPOINT = "https://formspree.io/f/mbgrrqnz";
     submitBtn.textContent = "Sending…";
 
     /* The raw form posts the programme SLUG ("strategic-hr"), because that is
-       what the <option> values carry. Sent as-is, the notification email reads
-       "programme: strategic-hr" with no dates and no venue, and someone has to
-       go and look it up. These extra fields resolve it to the real title and
-       schedule at submit time, so the email is readable on its own.
+       what the <option> values carry. Sent as-is, the CSV record reads
+       "programme: strategic-hr" with no dates and no venue, and someone has
+       to go and look it up. These extra fields resolve it to the real title
+       and schedule at submit time, so the CSV row is readable on its own —
+       register-handler.php reads them if present.
 
-       Underscore-prefixed names are Formspree's own: _subject sets the email
-       subject line. Everything else just appears as a labelled row. */
+       The names are lowercase with underscores and must stay that way: PHP
+       rewrites spaces in incoming field names to underscores, so a field
+       posted as "Programme title" arrives as $_POST['Programme_title'] and
+       the handler reading the spaced name would silently get nothing. */
     var data = new FormData(form);
     var chosen = FM.find(form.elements.programme.value);
 
-    data.append("_subject",
-      "Registration — " + (chosen ? chosen.title : "programme to be confirmed"));
-
-    /* Makes Reply in the notification email go to the delegate rather than to
-       Formspree, so a quotation can be sent straight back. */
-    data.append("_replyto", form.elements.email.value.trim());
-
     if (chosen) {
-      data.append("Programme title", chosen.title);
-      data.append("Programme dates", FM.dateRange(chosen));
-      data.append("Programme venue", chosen.venue +
+      data.append("programme_title", chosen.title);
+      data.append("programme_dates", FM.dateRange(chosen));
+      data.append("programme_venue", chosen.venue +
         (FM.venueIsProposed(chosen) ? " (proposed)" : ""));
     }
 
@@ -256,14 +253,27 @@ var ENDPOINT = "https://formspree.io/f/mbgrrqnz";
       body: data
     })
       .then(function (res) {
-        if (!res.ok) { throw new Error("Request failed: " + res.status); }
-        confirmSuccess();
+        /* The handler always answers with JSON. If the body will not parse,
+           something upstream of it broke — PHP not installed on the host, a
+           500 page, a captive-portal interception — and the parser's own
+           message ("Unexpected token '<'…") is not something to show a
+           delegate. Swallow it and let the generic wording below stand. */
+        return res.json().catch(function () { return null; })
+          .then(function (payload) {
+            if (!res.ok || !payload || !payload.success) {
+              /* Empty string, not a bare null: new Error(null) sets .message
+                 to the literal "null", which would print in the panel. */
+              throw new Error((payload && payload.message) || "");
+            }
+            confirmSuccess();
+          });
       })
-      .catch(function () {
+      .catch(function (err) {
         submitBtn.disabled = false;
         submitBtn.textContent = "Submit registration";
         alertList.innerHTML =
-          "<li>We could not send your registration just now. Please email " +
+          "<li>" + FM.esc(err && err.message ? err.message :
+            "We could not send your registration just now.") + " Please email " +
           '<a href="mailto:trainings@forumminds.com">trainings@forumminds.com</a> ' +
           "and we will pick it up from there.</li>";
         alertBox.classList.add("is-shown");

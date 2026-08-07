@@ -1,0 +1,18 @@
+# ForumMinds — block direct public access to the registrations backup
+# (delegate PII). It is still readable by register-handler.php on the
+# server side; this only stops a browser from requesting it directly.
+
+<IfModule mod_authz_core.c>
+  # Apache 2.4+
+  <Files "registrations.csv">
+    Require all denied
+  </Files>
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+  # Apache 2.2
+  <Files "registrations.csv">
+    Order allow,deny
+    Deny from all
+  </Files>
+</IfModule>

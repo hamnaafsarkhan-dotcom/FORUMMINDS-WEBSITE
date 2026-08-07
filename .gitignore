@@ -12,3 +12,6 @@ Desktop.ini
 .idea/
 *.swp
 *~
+
+# Registration backend — delegate PII, never committed. See register-handler.php.
+registrations.csv
