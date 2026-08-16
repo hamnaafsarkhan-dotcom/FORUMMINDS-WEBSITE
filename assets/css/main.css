@@ -47,12 +47,29 @@
   /* Dark surfaces ------------------------------------------------------- */
   --deep:        #05203F;  /* hero, footer, dark bands */
   --deep-2:      #0C3055;  /* raised cards on a dark surface */
+  --deep-3:      #123C68;  /* a dark card lifted on hover, one step above
+                              --deep-2. Not a surface to place at rest. */
   --deep-line:   #1D4370;  /* hairlines on a dark surface */
 
   /* Light surfaces and text --------------------------------------------- */
   --ink:         #0B1B2B;  /* headings. Also the label colour on gold fills. */
-  --slate:       #4A5A6E;  /* body copy. 6.4:1 on --paper */
-  --slate-soft:  #75849A;  /* captions, meta. Use at 14px+ only */
+  --slate:       #4A5A6E;  /* body copy. 6.7:1 on --paper */
+  --slate-soft:  #5F6C7D;  /* captions, meta. 5.1:1 on --paper.
+
+       This was #75849A, and the note here read "use at 14px+ only" — which
+       misread the WCAG rule. The 3:1 allowance is for LARGE text, and large
+       means 24px regular or 18.66px bold, not 14px. Every one of the 34
+       places this token is used sets --t-small (14px) or --t-micro (12px),
+       so all of them needed the normal-text threshold of 4.5:1 and the old
+       value gave 3.8:1 on white, 3.2:1 on --surface-7. It failed AA
+       everywhere it was used.
+
+       #5F6C7D is the smallest darkening that clears 4.5:1 against every
+       surface in the ramp, including the darkest (4.50:1 on --surface-7,
+       5.4:1 on --white). Hue is unchanged — the channels are scaled
+       together — so it still reads as the soft grey-blue it was, and it is
+       still clearly lighter than --slate, which is what keeps the caption /
+       body-copy hierarchy visible. */
   --paper:       #F7F9FC;  /* page background */
   --white:       #FFFFFF;  /* cards */
   --line:        #E2E8F0;  /* hairlines and borders on light */
@@ -95,7 +112,11 @@
   --footmark-w: 280px;   /* footer, renders 37px tall */
 
   /* Type scale — fluid, clamps between mobile and desktop */
-  --t-hero:  clamp(2.5rem, 1.4rem + 4.6vw, 5rem);
+  --t-hero:  clamp(2.5rem, 1.4rem + 4.6vw, 5rem);  /* nothing uses this today:
+                             the hero sets its own sizes alongside its own
+                             typeface pair. Kept because it is the head of the
+                             scale and the documented one-line hero rollback
+                             (to the site-wide pair) needs it back. */
   --t-h1:    clamp(2.1rem, 1.4rem + 2.9vw, 3.5rem);
   --t-h2:    clamp(1.7rem, 1.25rem + 1.9vw, 2.6rem);
   --t-h3:    clamp(1.25rem, 1.05rem + 0.85vw, 1.6rem);
@@ -134,14 +155,99 @@
   --radius-pill: 999px;
   --radius-circle: 50%;
 
-  /* A note on the hex literals further down this file.
-     Roughly fifty remain, and almost all are STOPS INSIDE GRADIENTS — e.g.
-     #FAFBFC -> #F6F9FB -> #F2F6FA. They look like near-duplicates of --paper
-     because that is what they are: a gradient needs values a few units apart,
-     and collapsing them onto one token would flatten it into a flat fill. Those
-     are deliberately literal. What is NOT acceptable is a literal that exactly
-     equals a token (a bare #C9A227 where --gold would do); those have all been
-     replaced. Before adding a hex value below, check which of the two it is. */
+  /* Surface tints — the near-white ramp -----------------------------------
+     Eight separate light gradients in this file were each hand-mixed from
+     their own near-white stops: twenty-odd values (#FAFBFC, #F6F9FB,
+     #F2F6FA, #FCFDFF, #EEF3F8 …) all sitting within a few units of each
+     other and of --paper.
+
+     An earlier note here argued they had to stay literal, because collapsing
+     them onto one token would flatten every gradient into a flat fill. That
+     is true of collapsing them onto ONE token — but a gradient does not need
+     anonymous values, it needs a RAMP. Naming the steps leaves each gradient
+     exactly as deep as it was and makes the whole set adjustable at once.
+
+     Nothing moved by more than 2/255 when the literals were mapped onto this
+     scale — these are the surfaces the design was already using, recovered
+     rather than redesigned. Same discipline as the radius scale above.
+
+     Pick by depth, not by name: 1–2 sit above the page, 3 is the page, 4–5
+     are recessed fields, 6–7 are the bottom of a light gradient or a hairline
+     on white.
+
+     Measured contrast of the text tokens against this ramp — every one of
+     these passes AA for normal-size text, worst case included:
+
+                    --ink   --slate  --slate-soft  --accent
+       --surface-1  17.1     6.9        5.2         11.6
+       --surface-3  16.5     6.7        5.1         11.2
+       --surface-5  16.0     6.5        4.9         10.9
+       --surface-7  14.7     5.9        4.5          9.9
+
+     --gold is 2.3:1 on --surface-3 and is not in this table on purpose: it
+     is never a text colour on a light surface. See the note on --gold. */
+  --surface-1: #FCFDFE;
+  --surface-2: #FAFBFC;
+  --surface-3: #F7F9FC;   /* the same value as --paper, restated so the ramp
+                             reads continuously. Use --paper for the page
+                             background and --surface-3 inside a gradient. */
+  --surface-4: #F5F8FB;
+  --surface-5: #F2F6FA;
+  --surface-6: #EEF3F8;
+  --surface-7: #E7ECF2;
+
+  /* Gold ramp — the steps the gold controls' gradient fills travel between.
+     --gold is the flat brand value; these are its lighter and darker
+     neighbours, ordered light to dark so a top-to-bottom fill reads straight
+     down the list. */
+  --gold-lift:   #EECB4A;   /* hover fill, top */
+  --gold-hi:     #E2B63C;   /* rest fill, top */
+  --gold-mid:    #D4AC2C;   /* hover fill, middle */
+  --gold-deep:   #C09824;   /* hover fill, base */
+  --gold-deeper: #B8931F;   /* rest fill, base */
+  --gold-hover:  #B58F1C;   /* flat hover fill on .btn--primary */
+
+  /* The two gold fills themselves. The gradient is the reusable unit here,
+     not its stops — both of these were written out twice in the file before
+     they were named, which is precisely the duplication a token prevents. */
+  --fill-gold:
+    linear-gradient(180deg, var(--gold-hi) 0%, var(--gold) 55%, var(--gold-deeper) 100%);
+  --fill-gold-hover:
+    linear-gradient(180deg, var(--gold-lift) 0%, var(--gold-mid) 55%, var(--gold-deep) 100%);
+
+  /* Status tints. Each is a pale wash behind a message, not a text colour —
+     none of them is safe to set type in. --danger is the text colour. */
+  --success:      #1E9E6A;   /* the "seats confirmed" dot */
+  --danger-tint:  #FDF3F2;   /* form error panel wash */
+  --notice-tint:  #FFF4D6;   /* gold notice wash */
+
+  /* Delivery-format tints. Three deliberately different HUES — cool, neutral
+     and warm — that colour-code the three delivery panels. They are a set:
+     change one and the other two have to move with it or the coding breaks.
+     Each panel assigns these to its local --pg / --pa. */
+  --dlv-cool-1: #F3F8FD;  --dlv-cool-2: #E6F0FA;  --dlv-cool-ink: #1B4F86;
+  --dlv-neut-1: #F6F8FA;  --dlv-neut-2: #E7EDF3;  --dlv-neut-ink: #3A536B;
+  --dlv-warm-1: #FDFBF5;  --dlv-warm-2: #F6EEDF;  --dlv-warm-ink: #8A6A1E;
+
+  /* Hex literals that remain below are deliberate, and there are only four
+     kinds. Anything outside these four should become a token:
+       1. The DEFINITION of a section-local custom property (--up-meta,
+          --ts-navy-deep, --lw-border …). A literal has to live somewhere;
+          the definition site is that somewhere. What matters is that no
+          declaration further down repeats the value instead of using the
+          name.
+       2. Stops of a one-off dark gradient field that appears exactly once
+          (the Why tiles, the upcoming card, the journey band). These are
+          art direction for a single surface, not a reusable scale — naming
+          each stop individually would be a rename, not a system.
+       3. #000 inside a mask-image, where it is an alpha value and not a
+          colour at all.
+       4. #fff / #000 in the print stylesheet, which should be pure black on
+          pure white regardless of what the screen palette does.
+
+     Count at the time of writing: 16 literal occurrences outside :root, all
+     four kinds accounted for, down from ~40. If that number grows, something
+     has been added without a token. */
 
   --shadow-sm: 0 1px 2px rgba(11, 27, 43, 0.05);
   --shadow-md: 0 4px 16px rgba(11, 27, 43, 0.08);
@@ -388,7 +494,7 @@ li { margin-bottom: 0.4em; }
 /* Gold fill with ink text. White on gold is 2.9:1 and fails AA; ink on
    gold is 7.2:1. This is also the classic navy-and-gold button. */
 .btn--primary { background: var(--gold); color: var(--ink); }
-.btn--primary:hover { background: #B58F1C; color: var(--ink); }
+.btn--primary:hover { background: var(--gold-hover); color: var(--ink); }
 
 .btn--ghost {
   background: transparent; color: var(--ink);
@@ -1476,7 +1582,7 @@ li { margin-bottom: 0.4em; }
 .dlv {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(180deg, #FCFDFE 0%, #F7FAFC 100%);
+  background: linear-gradient(180deg, var(--surface-1) 0%, var(--surface-3) 100%);
 }
 .dlv > * { position: relative; z-index: 1; }
 
@@ -1524,7 +1630,7 @@ li { margin-bottom: 0.4em; }
   min-height: clamp(30rem, 25rem + 9vw, 37.5rem);
   border: 1px solid var(--pb, rgba(20, 57, 95, 0.10));
   border-radius: var(--radius-3xl);
-  background: var(--pg, linear-gradient(165deg, #F7FAFD, #ECF2F8));
+  background: var(--pg, linear-gradient(165deg, var(--surface-3), var(--surface-6)));
   box-shadow:
     0 1px 2px rgba(11, 27, 43, 0.04),
     0 10px 26px rgba(11, 27, 43, 0.06);
@@ -1538,21 +1644,23 @@ li { margin-bottom: 0.4em; }
     border-color 420ms var(--ease);
 }
 
-/* Per-panel palettes. */
+/* Per-panel palettes. Cool / neutral / warm — the three hues are what
+   colour-codes the delivery formats, so they are a set defined together in
+   :root rather than three unrelated gradients written out here. */
 .dlv__panel--online {
-  --pg: linear-gradient(165deg, #F3F8FD 0%, #E6F0FA 100%);
+  --pg: linear-gradient(165deg, var(--dlv-cool-1) 0%, var(--dlv-cool-2) 100%);
   --pb: rgba(27, 79, 134, 0.14);
-  --pa: #1B4F86;
+  --pa: var(--dlv-cool-ink);
 }
 .dlv__panel--onsite {
-  --pg: linear-gradient(165deg, #F6F8FA 0%, #E7EDF3 100%);
+  --pg: linear-gradient(165deg, var(--dlv-neut-1) 0%, var(--dlv-neut-2) 100%);
   --pb: rgba(20, 57, 95, 0.13);
-  --pa: #3A536B;
+  --pa: var(--dlv-neut-ink);
 }
 .dlv__panel--premises {
-  --pg: linear-gradient(165deg, #FDFBF5 0%, #F6EEDF 100%);
+  --pg: linear-gradient(165deg, var(--dlv-warm-1) 0%, var(--dlv-warm-2) 100%);
   --pb: rgba(201, 162, 39, 0.22);
-  --pa: #8A6A1E;
+  --pa: var(--dlv-warm-ink);
 }
 
 /* ---- Active state ------------------------------------------------------
@@ -1813,11 +1921,11 @@ li { margin-bottom: 0.4em; }
   --lw-card-h: 110px;
   --lw-gap: clamp(0.85rem, 0.6rem + 0.7vw, 1.25rem);
   --lw-cycle: 25s;
-  --lw-border: #E7ECF2;
+  --lw-border: var(--surface-7);
 
   position: relative;
   overflow: hidden;
-  background: linear-gradient(180deg, #FAFBFC 0%, #F6F9FB 55%, #F2F6FA 100%);
+  background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface-3) 55%, var(--surface-5) 100%);
 }
 .lw > * { position: relative; z-index: 1; }
 
@@ -2215,7 +2323,7 @@ a.lw__card { cursor: pointer; }
   background:
     radial-gradient(52rem 34rem at 84% 90%, rgba(20, 57, 95, 0.055), transparent 72%),
     radial-gradient(40rem 28rem at 6% 4%, rgba(201, 162, 39, 0.05), transparent 70%),
-    linear-gradient(135deg, #FAFBFC 0%, #F4F7FA 46%, #EEF4F8 100%);
+    linear-gradient(135deg, var(--surface-2) 0%, var(--surface-4) 46%, var(--surface-6) 100%);
 }
 /* Field texture: a faint dot grid and two wide gold arcs, all gradients. */
 .closing::before {
@@ -2382,6 +2490,7 @@ a.lw__card { cursor: pointer; }
   --up-edge: rgba(90, 145, 205, 0.35);
   --up-edge-hi: rgba(74, 134, 199, 0.72);
   --up-blue: #2F6DA8;                     /* icons and arrows on light */
+  --up-node: #0E2F3F;                     /* the dot on the gold spine */
 
   /* One shadow stack, used everywhere. */
   --up-sh: 0 10px 25px rgba(10, 35, 55, 0.08), 0 30px 70px rgba(10, 35, 55, 0.10);
@@ -2389,7 +2498,7 @@ a.lw__card { cursor: pointer; }
 
   position: relative;
   overflow: hidden;
-  background: linear-gradient(180deg, #F8FAFC 0%, #F3F7FB 52%, #EDF3F8 100%);
+  background: linear-gradient(180deg, var(--surface-3) 0%, var(--surface-4) 52%, var(--surface-6) 100%);
 }
 .up > * { position: relative; z-index: 1; }
 
@@ -2674,7 +2783,7 @@ a.lw__card { cursor: pointer; }
   padding: 0 1.75rem;
   min-height: 50px;
   border-radius: var(--radius-md);
-  background: linear-gradient(180deg, #E2B63C 0%, var(--gold) 55%, #B8931F 100%);
+  background: var(--fill-gold);
   color: var(--ink);
   font-size: var(--t-small); font-weight: 700;
   letter-spacing: 0.03em;
@@ -2686,7 +2795,7 @@ a.lw__card { cursor: pointer; }
               box-shadow 240ms var(--ease);
 }
 .up__f-cta:hover {
-  background: linear-gradient(180deg, #EECB4A 0%, #D4AC2C 55%, #C09824 100%);
+  background: var(--fill-gold-hover);
   color: var(--ink);
   transform: translateY(-2px);
   box-shadow:
@@ -2803,7 +2912,7 @@ a.lw__card { cursor: pointer; }
   width: 10px; height: 10px;
   margin-top: -5px;
   border-radius: var(--radius-circle);
-  background: #0E2F3F;
+  background: var(--up-node);
   border: 2px solid rgba(201, 162, 39, 0.65);
   transition: background-color 380ms var(--ease), box-shadow 380ms var(--ease);
 }
@@ -2824,7 +2933,7 @@ a.lw__card { cursor: pointer; }
   padding: 0.7rem 0.55rem;
   border: 1px solid rgba(90, 145, 205, 0.32);
   border-radius: var(--radius-xl);
-  background: linear-gradient(180deg, var(--white) 0%, #F9FBFD 100%);
+  background: linear-gradient(180deg, var(--white) 0%, var(--surface-2) 100%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.95),
     0 4px 12px rgba(10, 35, 55, 0.10);
@@ -3075,7 +3184,7 @@ a.lw__card { cursor: pointer; }
 }
 .jrn__core {
   width: 6px; height: 6px;
-  background: #FFF4D6;
+  background: var(--notice-tint);
   box-shadow: 0 0 8px rgba(255, 240, 200, 0.95);
 }
 .jrn__halo {
@@ -3169,7 +3278,7 @@ a.lw__card { cursor: pointer; }
 }
 .chal-card:hover {
   border-color: var(--gold);
-  background: #123C68;
+  background: var(--deep-3);
   transform: translateY(-3px);
 }
 .chal-card__n {
@@ -3240,7 +3349,7 @@ a.lw__card { cursor: pointer; }
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  background: linear-gradient(180deg, #FDFEFE 0%, #F6F9FC 55%, #EEF3F8 100%);
+  background: linear-gradient(180deg, var(--surface-1) 0%, var(--surface-3) 55%, var(--surface-6) 100%);
 }
 .talk > .wrap { position: relative; z-index: 2; }
 
@@ -3419,7 +3528,7 @@ a.lw__card { cursor: pointer; }
   padding: 5px 0;
   text-align: center;
   transform: rotate(45deg);
-  background: linear-gradient(180deg, #E2B63C, var(--gold));
+  background: linear-gradient(180deg, var(--gold-hi), var(--gold));
   color: var(--ink);
   font-size: 8.5px; font-weight: 700;
   letter-spacing: 0.06em; text-transform: uppercase;
@@ -3542,13 +3651,13 @@ a.lw__card { cursor: pointer; }
 
 .talk__btn--gold {
   border-color: rgba(201, 162, 39, 0.55);
-  background: linear-gradient(180deg, #E2B63C 0%, var(--gold) 55%, #B8931F 100%);
+  background: var(--fill-gold);
   color: var(--ink);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 8px 20px rgba(3, 12, 24, 0.3);
 }
 .talk__btn--gold:hover {
   border-color: var(--gold-bright);
-  background: linear-gradient(180deg, #EECB4A 0%, #D4AC2C 55%, #C09824 100%);
+  background: var(--fill-gold-hover);
   color: var(--ink);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.45),
@@ -4091,7 +4200,7 @@ a.lw__card { cursor: pointer; }
   display: none;
   border: 1px solid var(--danger);
   border-left-width: 3px;
-  background: #FDF3F2;
+  background: var(--danger-tint);
   border-radius: var(--radius);
   padding: 1rem 1.15rem;
   margin-bottom: 1.75rem;
@@ -4629,9 +4738,9 @@ a.lw__card { cursor: pointer; }
   --ts-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ts-navy: var(--accent);
   --ts-navy-deep: #0E2C4C;
+  --ts-navy-deepest: #071F38;   /* base of the featured-panel media gradient */
   --ts-line: rgba(20, 57, 95, 0.10);
   --ts-line-soft: rgba(20, 57, 95, 0.06);
-  --ts-glow: rgba(20, 57, 95, 0.30);
   --ts-shadow: 0 30px 70px -34px rgba(11, 27, 43, 0.42);
   --ts-shadow-sm: 0 14px 34px -20px rgba(11, 27, 43, 0.34);
 
@@ -4640,7 +4749,7 @@ a.lw__card { cursor: pointer; }
   overflow: hidden;
   padding-block: clamp(2.5rem, 1.5rem + 3vw, 4rem) var(--section-y);
   background:
-    linear-gradient(180deg, #FCFDFF 0%, #F5F8FC 40%, #EEF3F9 100%);
+    linear-gradient(180deg, var(--surface-1) 0%, var(--surface-4) 40%, var(--surface-6) 100%);
 }
 
 /* ---- Background field: two soft radial lights, a dotted texture and a
@@ -4721,7 +4830,7 @@ a.lw__card { cursor: pointer; }
 .ts-stat__dot {
   position: absolute; top: 1.35rem; right: 1.35rem;
   width: 8px; height: 8px; border-radius: var(--radius-circle);
-  background: #1E9E6A;
+  background: var(--success);
   box-shadow: 0 0 0 0 rgba(30, 158, 106, 0.45);
   animation: ts-live 2.4s ease-out infinite;
 }
@@ -5049,7 +5158,7 @@ a.lw__card { cursor: pointer; }
 .ts-feature__media {
   position: relative;
   height: clamp(11rem, 8rem + 11vw, 16rem);
-  background: linear-gradient(140deg, var(--ts-navy-deep), #071F38);
+  background: linear-gradient(140deg, var(--ts-navy-deep), var(--ts-navy-deepest));
   overflow: hidden;
 }
 .ts-feature__media img {

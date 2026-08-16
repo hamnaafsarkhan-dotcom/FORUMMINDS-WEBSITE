@@ -147,8 +147,15 @@ logos/                              Client/partner logos for the logo wall (ADNO
 **Design decision-making pattern:** Hamna consistently defers visual/technical choices ("whatever suits best", "choose yourself") and directs instead by reference (an existing site, a Dribbble link, "take inspiration from gpstrategies.com"). Established working pattern: pick the option, state the reasoning in a sentence or two, build it, and show a render — don't present multiple-choice design questions. Do still ask Hamna directly about anything only they can know: real programme dates, venues, fees, trainer names, brand assets.
 
 **Colour system** (`assets/css/main.css` `:root` block):
-- `--gold` (#C9A227) / `--gold-bright` / `--gold-tint` — accents, marks, active states, dark-surface text. Gold is only 2.4:1 on white, so **never use it as text colour on a light background** — use `--accent` instead.
+- `--gold` (#C9A227) / `--gold-bright` / `--gold-tint` — accents, marks, active states, dark-surface text. Gold is only 2.3:1 on white, so **never use it as text colour on a light background** — use `--accent` instead.
 - `--accent` (#14395F) — coloured text/fills on light backgrounds, AA-passing both directions.
+- **`--surface-1` … `--surface-7`** — the near-white ramp, added 2026-08-08. Eight light gradients across the file were each hand-mixed from their own near-white stops (twenty-odd values within a few units of each other and of `--paper`). They are now steps on one named ramp. `--surface-3` is the same value as `--paper`. Nothing moved by more than 2/255 in the conversion — verified by pixel-diffing every page, see §11.
+- **`--gold-lift` / `-hi` / `-mid` / `-deep` / `-deeper` / `-hover`** plus **`--fill-gold`** and **`--fill-gold-hover`** — the gold gradient fills. Both gradients had been written out twice in the file; they are now one token each.
+- **`--dlv-cool-*` / `--dlv-neut-*` / `--dlv-warm-*`** — three deliberately different hues that colour-code the delivery-format panels. They are a set: change one and the other two must move with it or the coding breaks.
+- **`--success` / `--danger-tint` / `--notice-tint`** — pale status washes. None of them is safe to set type in; `--danger` is the text colour.
+- **`--slate-soft` was #75849A and is now #5F6C7D** (2026-08-08). The old value failed WCAG AA everywhere it was used: its note said "use at 14px+ only", but WCAG's 3:1 allowance is for *large* text, meaning 24px regular or 18.66px bold — not 14px. All 34 usages set 14px or 12px, so all of them needed 4.5:1 and got 3.8:1 on white. The new value is the smallest darkening that clears 4.5:1 against every surface in the ramp (4.5:1 on the darkest, 5.3:1 on white), with hue unchanged. A measured contrast table for the whole ramp is in the `:root` block.
+
+  **This is the one change in that pass that is visible** — captions and metadata are slightly darker. Everything else was imperceptible by construction.
 - `--hero-navy` / `--hero-gold` / `--hero-gold-dark` — a deliberately distinct, slightly warmer palette used **only** in the hero brief. Read the comment at `assets/css/main.css` line ~33 before reusing these elsewhere — they're close enough to the main tokens to read as a mismatch where the two meet (e.g. hero button next to header Register button). If you'd rather unify to one gold, the file documents the exact one-line change (`--gold: #D9A441`, delete `--hero-gold`).
 - Full palette also has dark surfaces (`--deep`, `--deep-2`, `--deep-line`) and light surfaces/text (`--ink`, `--slate`, `--slate-soft`, `--paper`, `--white`, `--line`).
 
@@ -192,9 +199,48 @@ logos/                              Client/partner logos for the logo wall (ADNO
 
    The time check only fires in the **0–3s window**. A missing `t` means the JS did not run — a broken page, not a bot — and a *negative* elapsed time means the delegate's clock disagrees with the server's (or a 32-bit PHP build overflowed the millisecond value). Neither discards the registration. Silently dropping a real booking is a much worse failure than letting a bot through.
 
-   **Not yet verified end to end.** There is no PHP binary in this environment, so the handler has never been executed — not even syntax-checked. Before launch, run it once against `php -S localhost:8000` (§1) and submit the form: confirm a `registrations.csv` appears with a header row, that a bad email returns the "Please check:" panel, and that the honeypot path returns success without writing a row.
+   ### 5.1b Handler verification — done 2026-08-16
 
-   Two host requirements worth checking before deploying: the handler needs **mbstring** (`mb_strlen`/`mb_substr`), and `.htaccess` is only read by **Apache or LiteSpeed** — on Nginx the CSV is not protected, and the deny rule must be translated into the server config by hand.
+   **The handler now runs and behaves as documented.** Previously it had never been executed at all, because there was no PHP binary in this environment. Verified against **PHP 8.3.33** (NTS, Windows) served by `php -S localhost:8000` from the project root, posting the same field set `register.js` sends:
+
+   | Case | Result |
+   | --- | --- |
+   | `php -l` syntax check | Clean — the file's first ever parse |
+   | `mbstring` present | Loaded; `mb_strlen`/`mb_substr` work |
+   | Valid submission | 200, `{"success":true}`, header row + data row written |
+   | Bad email | 422, `"Please check: Work email."`, nothing written |
+   | Honeypot filled | 200 success, **no row** — byte-identical to a real success |
+   | Submitted under 3s | 200 success, **no row** |
+   | Missing `t` stamp | Saved, as intended — a broken page is not a bot |
+   | Clock 10 minutes ahead | Saved — skew does not discard a booking |
+   | Second submission | Appended; header not repeated |
+   | `GET` instead of `POST` | 405 |
+
+   Both spam rejections wrote their one line to the error log. The `programme_title` / `programme_dates` / `programme_venue` underscore trap (above) is genuinely avoided — all three arrived populated rather than falling back to the slug.
+
+   **The browser path is verified too.** A temporary same-origin harness page drove the real form in headless Chrome — that is the only way to script it, since `file://` cannot reach the handler. It confirmed, in order: the dropdown populates with 9 programmes from `programmes.js`; the load-time `t` stamp is set; an empty submit is blocked by the client-side `RULES` with the alert panel shown; choosing a programme fills the note under the dropdown; and after waiting out the 3s gate, submitting shows `#form-success` with the correct recap (programme title, delegate count, email) **and writes a row**. The row is what proves it — a submission dropped by the spam gate also reports success, so the panel alone would not have distinguished the two. The harness has been deleted.
+
+   **The one thing still unverifiable here: the `.htaccess` deny rule.** PHP's built-in server does not read `.htaccess`, so `registrations.csv` was freely downloadable over `localhost:8000`. That is an artefact of the test server, not a finding — but the PII protection remains **unverified** and can only be checked on the real host. Request `https://<domain>/registrations.csv` after deploying; anything other than 403 means the rule is not in force.
+
+   **Two faults the verification found, both fixed 2026-08-16:**
+
+   - **`register.html` stated an unconfirmed venue as fact.** The note under the dropdown and the success recap printed `p.venue` raw — "Riyadh, Saudi Arabia" — while the programme pages correctly print "Riyadh, Saudi Arabia (proposed)". The submitted payload was already qualified, so only the two panels the delegate actually reads were wrong, which is the worst place for it. `register.js` now has a `venueText()` helper used by the note, both recaps and the manual-mode email, and the submit handler reuses it instead of repeating the expression. This resolves itself as venues are confirmed — `venueIsProposed()` already returns false for `CONFIRMED_VENUES` slugs, for "At your premises", and for format-derived venues like "Live Online".
+   - **The CSV had no UTF-8 BOM.** The rows are UTF-8, but Excel on Windows opens a double-clicked `.csv` in the system ANSI codepage unless a BOM says otherwise, so "24–25 Aug 2026" arrived as "24â€“25 Aug 2026" — and a non-Latin delegate name would have been unrecoverable from the spreadsheet, which matters for a Gulf and Pakistan audience. `register-handler.php` now writes the BOM once, in the same `$isNew` branch that writes the header. Verified: BOM present, header intact, en-dash preserved.
+
+   **One cosmetic wart, working as designed.** `csvSafe()` prefixes an apostrophe to any value starting with `=+-@`, so a phone number stored from the form reads `'+92 300 1234567`. The form asks for a country code, so this will affect essentially every row. The escaping is correct — an unescaped leading `+` is a formula to Excel — and only the display is affected; noted here so it does not get mistaken for corruption.
+
+   Two host requirements worth checking before deploying: the handler needs **mbstring** (`mb_strlen`/`mb_substr`) — confirmed working locally, but the host's build is what counts — and `.htaccess` is only read by **Apache or LiteSpeed** — on Nginx the CSV is not protected, and the deny rule must be translated into the server config by hand.
+
+   `registrations.csv` was deleted after verification, so the file does not exist and the first real registration will create it with a fresh BOM and header. Do not upload a copy of it.
+
+   ### 5.1c What to check on the host, once deployed
+
+   Nothing below can be tested from this machine — all four depend on the real server:
+
+   1. **PHP runs at all.** If `register-handler.php` is served as plain text, every submission fails; `register.js` swallows the unparseable body and shows the generic "could not send" wording with the mailto fallback, so the form degrades safely but silently. Submit once and confirm a row appears.
+   2. **`mbstring` is enabled** — `mb_strlen`/`mb_substr`. Confirmed working locally on PHP 8.3.33, but the host's build is what counts.
+   3. **`registrations.csv` is not web-readable.** Request it directly; expect 403. On **Nginx the `.htaccess` does nothing** and the deny rule must be translated into the server config by hand — this is delegate PII.
+   4. **The directory is writable** by the PHP user, or `fopen` fails and the delegate gets "We could not save your registration."
 
 2. **Three placeholder fields throughout `data/programmes.js`,** flagged in that file's own header comment:
    - `venue` — city venues are proposed, not confirmed (only "Live Online" entries are certain). This is now *visible to the visitor*: programme pages render the venue as "Riyadh, Saudi Arabia (proposed)" plus a note under the enrolment panel. To confirm a venue, replace the string and add the slug to `FM.CONFIRMED_VENUES` in `data/programmes.js` — the qualifier disappears for that programme only.
@@ -472,11 +518,12 @@ been sent yet. The success confirmation is now only ever shown after a real subm
   panel tells the visitor the listings will be empty and gives them the email address.
 - **Favicon still the superseded logo** — replaced with the "O" mark, see §9.
 - **`_talk2.html` and the unused `calendar.js` in the deploy directory** — removed.
-- **Off-token near-white hex tints.** Investigated and *deliberately left alone*. Every one of
-  them turned out to be a stop inside a gradient (`#FAFBFC → #F6F9FB → #F2F6FA`); collapsing
-  them onto `--paper` would have flattened the gradients into flat fills. The audit's implied
-  fix was wrong here. What was fixed instead: six literals that *exactly* equalled an existing
-  token. The reasoning is recorded in the `:root` block so this does not get "fixed" later.
+- **Off-token near-white hex tints.** Initially left alone, then **reversed and fixed on
+  2026-08-08** — see §11. The original reasoning was that each one is a stop inside a gradient
+  (`#FAFBFC → #F6F9FB → #F2F6FA`), and that collapsing them onto `--paper` would flatten the
+  gradients into flat fills. That was true of collapsing them onto *one* token, but it was the
+  wrong conclusion: a gradient does not need anonymous values, it needs a **ramp**. They are now
+  steps on `--surface-1 … --surface-7` and every gradient is exactly as deep as it was.
 - **Region messaging inconsistency.** Reviewed and **kept as is, deliberately.** The audit
   overstated it — it is 6 pages, not every category page, and most mentions are substantive
   editorial copy (leadership across Gulf cultures, cultural intelligence) rather than
@@ -508,13 +555,21 @@ been sent yet. The success confirmation is now only ever shown after a real subm
 
 ### Still outstanding — needs Hamna, not code
 
-1. ~~The form endpoint~~ — **done 2026-08-05**, both forms are live on Formspree (§5.1).
+1. ~~The form endpoint~~ — **done 2026-08-05.** The two forms use different mechanisms: `contact.html` posts to Formspree, `register.html` to the self-hosted `register-handler.php` (§5.1). The handler was verified end to end on 2026-08-16 (§5.1b).
 2. Real `fee` and `trainer` values — both are placeholders on all nine programmes (§5.2).
 3. Dates for `ai-ready-critical-thinking` (§5.3).
 4. Real session photography to replace the CC0 stock (§5.4).
 5. `assets/img/band-texture.jpg` is a 612x408 source used at ~1400px wide. The 2px blur on it
    is load-bearing — it is what stops the upscale from reading as a low-quality image. A
    2000px+ replacement lets the blur drop to 0.
+6. Confirmed venues. Every city venue still renders as "(proposed)" sitewide, now including
+   `register.html` (§5.1b). Confirming one is a two-line edit per programme — replace the
+   venue string and add the slug to `FM.CONFIRMED_VENUES` in `data/programmes.js`.
+
+**None of items 2–6 block a technical launch; they are all statements the site currently makes
+honestly** ("On request", "Industry Expert", "(proposed)", stock photography). They block
+launching without those caveats being true. Item 5 in §5 stands: do not present any of them as
+final in client-facing communication.
 
 ### Verification
 
@@ -540,3 +595,80 @@ explicit `--user-data-dir` or it can hang indefinitely on first run, and its **c
 keep the redirected stdout handle open after the parent exits** — so reading the dump
 immediately after `WaitForExit` silently returns the *previous* page's output, which looks like
 every page rendering identically. Retry the read until the handle frees.
+
+---
+
+## 11. Colour & design-system pass (2026-08-08)
+
+Aimed at the two audit categories that scored lowest on things code could actually change:
+**Colour & imagery 6/10** and **Design system consistency 6/10** (§10). Both of those scores
+predate the 2026-08-04 fixes, so part of each was already closed before this pass started.
+
+### What the audit asked for, and where each item stands
+
+| Audit finding | Category | Status |
+|---|---|---|
+| Two 1.4–1.5MB unoptimized hero PNGs | Colour & imagery | Fixed 2026-08-04 |
+| No Open Graph image | Colour & imagery | Fixed 2026-08-04 |
+| 612×408 photo upscaled past its resolution | Colour & imagery | **Still open — needs a photograph, not code** |
+| 11+ one-off `border-radius` values | Design system | Fixed 2026-08-04 |
+| Single-use hex colours outside the token block | Design system | **Fixed in this pass** |
+
+### The colour literals
+
+Roughly forty hex literals sat outside `:root`. They are now fifteen, and every one of those
+fifteen falls into a documented category — the exceptions list is written into the `:root`
+block itself, with the current count, so a future reader can tell whether the system is being
+followed or has quietly drifted:
+
+1. the **definition** of a section-local custom property (a literal has to live somewhere);
+2. stops of a **one-off dark gradient field used exactly once** (the Why tiles, the upcoming
+   card, the journey band) — art direction for a single surface, not a reusable scale;
+3. `#000` inside a `mask-image`, where it is an alpha value and not a colour;
+4. `#fff` / `#000` in the **print stylesheet**, which should be pure black on white regardless
+   of the screen palette.
+
+New scales: `--surface-1…7`, the gold ramp plus `--fill-gold` / `--fill-gold-hover`, the three
+`--dlv-*` delivery hues, and `--success` / `--danger-tint` / `--notice-tint`. Two dead tokens
+were found: `--ts-glow` (removed) and `--t-hero` (kept, with a note — it is the head of the
+type scale and the documented one-line hero rollback needs it back).
+
+### The accessibility defect found on the way
+
+`--slate-soft` was **failing WCAG AA in all 34 places it was used.** Its own note said "use at
+14px+ only", which misreads the rule: WCAG's 3:1 allowance applies to *large* text — 24px
+regular or 18.66px bold — and every usage sets 14px or 12px. It measured 3.8:1 on white against
+a 4.5:1 requirement. Corrected to `#5F6C7D`, the smallest darkening that clears 4.5:1 on every
+surface in the ramp, hue unchanged. Full measured table is in `:root`.
+
+This is worth knowing because the audit *praised* this file for documenting its contrast ratios
+inline. It did — the numbers were just never checked against the size the text is actually set
+at, which is the half of the rule that is easy to miss.
+
+### How "nothing moved" was verified
+
+Not by eye. Every page was rendered twice — once with the pre-change stylesheet, once with the
+new one — and pixel-diffed. Two traps worth knowing if you repeat this:
+
+- **Entrance animations make renders non-deterministic.** The first diff showed 236,000 changed
+  pixels on `training-schedule.html` and a max delta of 216/255, which looks like a serious
+  regression. It was the `.is-ready` reveal (§8) caught at different points in its fade. The
+  control that proves it: render the *same* stylesheet twice and diff that. On the programme
+  page the same-CSS control diff was byte-for-byte identical to the change diff — i.e. entirely
+  noise.
+- **Render with `--force-prefers-reduced-motion`.** That flattens the animated sections (§8) and
+  makes the comparison deterministic. Under it the real numbers were: `index` and the programme
+  pages **zero** changed pixels; `training-schedule` and `contact` changed by exactly **1/255**,
+  with five pixels at 2/255 across the whole site. Below the perceptual threshold, as designed.
+
+The `--slate-soft` correction was made *after* those diffs and is deliberately excluded from
+them — it is a real, intended visual change.
+
+### Still needs Hamna, not code
+
+`assets/img/band-texture.jpg` is 612×408 and is used at roughly 1400px wide in two places
+(`.section--photo::before` and `.closing__img`). **No larger original exists** — the git baseline
+copy at `89aff97:images/next to hero.jpg` is the same 612×408 file, so it cannot be recovered by
+re-exporting. The first use hides the upscale behind a 2px blur; the second has no blur and is
+the exposed one. A 2000px+ replacement lets the blur drop to 0 and closes the last Colour &
+imagery item. Drop a file in at the same path — no code change needed.

@@ -152,6 +152,14 @@ if ($fh === false) {
    outcome than a registration dropped on the floor. */
 $locked = flock($fh, LOCK_EX);
 if ($isNew) {
+    /* UTF-8 BOM, written once when the file is created. The rows are UTF-8
+       (delegate names, and the en-dash in "24–25 Aug 2026"), but Excel on
+       Windows opens a double-clicked .csv using the system ANSI codepage
+       unless a BOM tells it otherwise — without this, "24–25 Aug 2026"
+       reads as "24â€“25 Aug 2026" and a non-Latin name is unrecoverable
+       from the spreadsheet. LibreOffice and Sheets detect UTF-8 either way. */
+    fwrite($fh, "\xEF\xBB\xBF");
+
     fputcsv($fh, [
         'Submitted At', 'Full Name', 'Job Title', 'Organisation', 'Industry',
         'Email', 'Phone', 'Country',

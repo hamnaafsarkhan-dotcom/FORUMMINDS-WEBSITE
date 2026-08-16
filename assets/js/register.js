@@ -89,6 +89,18 @@ var ENDPOINT = "register-handler.php";
     });
   }
 
+  /* City venues are proposals rather than bookings until the slug is added
+     to FM.CONFIRMED_VENUES, and every other page that names a venue says so
+     (see programme-page.js). The submit handler below already qualifies the
+     venue it posts — but the panels the delegate actually reads did not, so
+     this page was the one place that stated an unconfirmed city as fact.
+
+     venueIsProposed() already returns false for a format-derived venue like
+     "Live Online" and for "At your premises", so those come back unchanged. */
+  function venueText(p) {
+    return p.venue + (FM.venueIsProposed(p) ? " (proposed)" : "");
+  }
+
   /* A small confirmation of what was selected, under the dropdown */
   function showProgrammeNote(p) {
     var note = document.getElementById("programme-note");
@@ -101,14 +113,15 @@ var ENDPOINT = "register-handler.php";
     }
 
     var fmt = FM.format(p.format);
-    var venue = FM.venueLabel(p);
 
     note.hidden = false;
     note.textContent = [
       FM.dateRange(p),
       p.days + " day" + (p.days === 1 ? "" : "s"),
       fmt ? fmt.name : p.format,
-      venue
+      /* venueLabel() is null when the venue only repeats the format, which
+         is what drops it from the line entirely for e.g. Live Online */
+      FM.venueLabel(p) ? venueText(p) : null
     ].filter(Boolean).join(" · ");
   }
 
@@ -243,8 +256,7 @@ var ENDPOINT = "register-handler.php";
     if (chosen) {
       data.append("programme_title", chosen.title);
       data.append("programme_dates", FM.dateRange(chosen));
-      data.append("programme_venue", chosen.venue +
-        (FM.venueIsProposed(chosen) ? " (proposed)" : ""));
+      data.append("programme_venue", venueText(chosen));
     }
 
     fetch(ENDPOINT, {
@@ -291,7 +303,7 @@ var ENDPOINT = "register-handler.php";
       p ? p.title : "To be confirmed";
 
     document.getElementById("recap-dates").textContent =
-      p ? FM.dateRange(p) + " · " + p.venue : "We will be in touch to agree dates";
+      p ? FM.dateRange(p) + " · " + venueText(p) : "We will be in touch to agree dates";
 
     document.getElementById("recap-delegates").textContent =
       form.elements.delegates.value +
@@ -318,7 +330,7 @@ var ENDPOINT = "register-handler.php";
     document.getElementById("manual-programme").textContent =
       p ? p.title : "To be confirmed";
     document.getElementById("manual-dates").textContent =
-      p ? FM.dateRange(p) + " · " + p.venue : "To be agreed";
+      p ? FM.dateRange(p) + " · " + venueText(p) : "To be agreed";
     document.getElementById("manual-delegates").textContent =
       form.elements.delegates.value +
       " delegate" + (Number(form.elements.delegates.value) === 1 ? "" : "s");
@@ -336,7 +348,7 @@ var ENDPOINT = "register-handler.php";
       ["", ""],
       ["Programme", p ? p.title : form.elements.programme.value],
       ["Dates", p ? FM.dateRange(p) : "To be agreed"],
-      ["Venue", p ? p.venue : "To be agreed"],
+      ["Venue", p ? venueText(p) : "To be agreed"],
       ["Delegates", val("delegates")],
       ["Delivery format", delivery ? delivery.value : ""],
       ["", ""],
