@@ -11,9 +11,9 @@ Build started 2026-07-29. Plain HTML/CSS/JS, **no build step, no npm, no framewo
 ## 1. How to work on this site
 
 - Open any `.html` file directly in a browser (`file://`) — nothing needs a server. If you add fetch-based features later, you'll need `python -m http.server` or similar because `file://` blocks fetch.
-- **Exception: `register.html`'s form now needs PHP**, not just a static server — see §5.1. `python -m http.server` will serve `register-handler.php` as plain text instead of running it. Use `php -S localhost:8000` (or any PHP-capable host) to test the form end to end.
+- **Exception: `register.html`'s form can only be submitted on the deployed site** — see §5.1c. It posts to Netlify Forms, which only exists once Netlify has published the page, so a submit from `file://` or a local static server will always fail into the "could not send" panel. Everything else on the page — the dropdown, the validation, the error summary — works locally.
+- Git is initialized locally on branch `main`, remote `origin` → `github.com/hamnaafsarkhan-dotcom/FORUMMINDS-WEBSITE`.
 - There is **no package.json, no bundler, no linter**. Don't introduce one unless asked — that's a deliberate constraint (Hamna doesn't want a build step to maintain).
-- Git is initialized locally with no remote. If Hamna wants this on GitHub, `git remote add origin <url>` and push — the history is already meaningful (one commit per audit section).
 - **Image work has no CLI tooling here.** There is no ImageMagick, no Node, no working Python in this environment. Resizing and re-encoding was done with PowerShell + `System.Drawing`, and WebP decoding needs `PresentationCore`'s WIC decoder instead (`System.Drawing` cannot read WebP at all). Working scripts are described in §10.
 
 ---
@@ -173,7 +173,11 @@ logos/                              Client/partner logos for the logo wall (ADNO
 
 ## 5. Pending / not yet real
 
-1. **~~No form endpoint~~ — RESOLVED 2026-08-05.** `register.html` and `contact.html` now use two different mechanisms:
+1. **~~No form endpoint~~ — RESOLVED 2026-08-05, registration re-pointed at Netlify Forms 2026-08-17.**
+
+   > **⚠️ Read §5.1c first.** The site is deployed on Netlify, which serves static files and will not run PHP, so **`register-handler.php` is no longer called by anything.** The rest of this section describes the PHP path as it was built and verified; all of it still holds if the handler is ever put back on a PHP host, but it is not what runs today. `contact.html` is unaffected — Formspree is a third-party endpoint and works fine on Netlify.
+
+   `register.html` and `contact.html` use two different mechanisms:
 
    - **`assets/js/contact.js`** → still Formspree, `var CONTACT_ENDPOINT = "https://formspree.io/f/xwleeyvo"`. Submissions arrive by email at `trainings@forumminds.com`, `_subject`/`_replyto` set per submission.
    - **`assets/js/register.js`** → switched the same day, later on 2026-08-05, to a self-hosted PHP handler instead of Formspree: `var ENDPOINT = "register-handler.php"`. Registrations now:
@@ -233,9 +237,28 @@ logos/                              Client/partner logos for the logo wall (ADNO
 
    `registrations.csv` was deleted after verification, so the file does not exist and the first real registration will create it with a fresh BOM and header. Do not upload a copy of it.
 
-   ### 5.1c What to check on the host, once deployed
+   ### 5.1c Netlify Forms — what runs today (2026-08-17)
 
-   Nothing below can be tested from this machine — all four depend on the real server:
+   Netlify hosts static files and **will not run PHP**, so the registration form no longer posts to `register-handler.php`. The handler is still in the repo, unchanged apart from a "not in use" header, and `register.html` still carries every field it expects — nothing calls it.
+
+   **How the wiring works:**
+
+   - `register.html`'s `<form>` carries `name="registration"`, `method="POST"`, `data-netlify="true"` and `netlify-honeypot="website"`, plus a hidden `form-name` input repeating the name. Netlify reads the form and its field list **from the published HTML at deploy time**.
+   - `assets/js/register.js` has `var FORM_NAME = "registration"` where `ENDPOINT` used to be. It still intercepts the submit and posts by `fetch` — urlencoded, to `/`, with `form-name` in the body — so the existing `#form-success` recap panel can be shown in place instead of the delegate being navigated away to Netlify's generic success page.
+   - **No `action=` on the form, deliberately.** If the JS never runs, the browser does a plain POST to the same page, Netlify still records the registration, and the delegate lands on Netlify's own success page. Degraded, but not lost.
+   - **`programme_title` / `programme_dates` / `programme_venue` are now real hidden inputs** in `register.html`, filled by `register.js` at submit time. They used to be appended to the `FormData`. That no longer works: **Netlify only stores fields it saw in the published markup and silently ignores anything else**, so an appended value would have vanished and every submission would have read `programme: strategic-hr` with no dates or venue. The underscored names are kept — harmless here, and they keep the PHP handler usable.
+
+   **What to check after the first deploy:**
+
+   1. **The form is registered.** Netlify dashboard → **Forms** should list `registration` after a deploy. If it does not, the markup did not reach the published HTML and every submission will 404 — `register.js` then shows the "could not send" wording with the mailto fallback.
+   2. **A real submission arrives.** Submit once and confirm the entry appears under Forms → registration, with `programme_title`, `programme_dates` and `programme_venue` populated rather than blank.
+   3. **Turn on notifications.** Netlify does not email anyone by default — set Forms → **Notifications** → email to `trainings@forumminds.com`, or the submissions sit in the dashboard unseen.
+   4. **The spam gate is now half of what it was.** The `website` honeypot is handed to Netlify via `netlify-honeypot` and still works. The `t` timestamp check does **not** — it lived in the PHP handler and Netlify has no equivalent hook. The field is still stamped and posted, but nothing reads it. Netlify's own spam filtering plus the honeypot are the whole gate today.
+   5. **`registrations.csv` no longer exists** on a Netlify deploy — there is no server-side write. The Netlify dashboard is the only record; export it periodically if a backup matters. The `.htaccess` deny rule is also inert on Netlify (it is Apache/LiteSpeed only), which no longer matters because there is no CSV to protect.
+
+   ### 5.1d Only if the PHP handler is ever put back
+
+   On a PHP host, point `register.js`'s `fetch` back at `register-handler.php` and restore the JSON-parsing `.then` around it — the commit of 2026-08-17 has both. Leave `FORM_NAME` set to anything non-empty; clearing it is the separate manual-email mode, not the PHP path. Then the original host checks apply:
 
    1. **PHP runs at all.** If `register-handler.php` is served as plain text, every submission fails; `register.js` swallows the unparseable body and shows the generic "could not send" wording with the mailto fallback, so the form degrades safely but silently. Submit once and confirm a row appears.
    2. **`mbstring` is enabled** — `mb_strlen`/`mb_substr`. Confirmed working locally on PHP 8.3.33, but the host's build is what counts.

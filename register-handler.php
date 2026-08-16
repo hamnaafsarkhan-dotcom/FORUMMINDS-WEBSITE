@@ -1,6 +1,15 @@
 <?php
 /* ==========================================================================
    ForumMinds — register-handler.php
+
+   NOT IN USE since 2026-08-17. The site moved to Netlify, which serves static
+   files and will not run PHP, so register.html now posts to Netlify Forms
+   instead (see the header of assets/js/register.js). This file is kept for
+   reference and still works on a PHP host: set FORM_NAME to "" in register.js
+   and point its fetch back at this script. register.html still carries every
+   field it expects, including the "t" timestamp, though nothing stamps a
+   three-second gate any more on the Netlify path.
+
    Receives register.html's POST, validates the same fields register.js
    validates client-side, and appends a CSV backup row. Mirrors the field
    set/rules in assets/js/register.js's RULES object — keep the two in sync.

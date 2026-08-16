@@ -149,7 +149,30 @@
           <ul id="form-alert-list" style="margin:0.4rem 0 0;padding-left:1.15rem"></ul>
         </div>
 
-        <form id="register-form" novalidate>
+        <!-- -----------------------------------------------------------------
+             NETLIFY FORMS
+
+             data-netlify="true" is what makes Netlify register this form at
+             deploy time and store its submissions — there is no backend of
+             ours in the loop any more. Netlify reads the field list from
+             THIS markup as it is published, so every field that should be
+             recorded has to exist here: a value that register.js invents at
+             submit time and posts without a matching input is dropped.
+
+             name="registration" is the form's name in the Netlify UI, and
+             the hidden "form-name" input below repeats it in the body of
+             the post — required, and required to match.
+
+             No action=, deliberately. register.js intercepts the submit and
+             posts by fetch so the confirmation panel below can be shown
+             instead of a page change. If its JS never runs, the browser
+             falls back to a plain POST to this same page, which Netlify
+             also accepts — the registration is still recorded, the delegate
+             just lands on Netlify's own success page.
+             ----------------------------------------------------------------- -->
+        <form id="register-form" name="registration" method="POST"
+              data-netlify="true" netlify-honeypot="website" novalidate>
+          <input type="hidden" name="form-name" value="registration" />
 
           <!-- ---------------------------------------------------------------
                SPAM GATE — neither field is for a person to fill in.
@@ -158,13 +181,17 @@
                assistive technology and skipped by the tab order, so a human
                never meets it. Anything in it came from something filling in
                every input it found. It is NOT display:none, because some
-               bots skip those.
+               bots skip those. netlify-honeypot="website" on the form above
+               hands this field to Netlify, which silently drops any post
+               that arrives with it filled in.
 
-               "t" is stamped with the page-load time by register.js.
-               register-handler.php rejects a post that arrives less than
-               three seconds later. Both rejections are silent — the response
-               is the same one a real registration gets, so a bot cannot tell
-               which check caught it and tune around it.
+               "t" is stamped with the page-load time by register.js. It was
+               the second half of the gate: register-handler.php rejected a
+               post that arrived less than three seconds later. NOTHING
+               CHECKS IT NOW — Netlify has no equivalent hook — so it rides
+               along as an unused field, kept only so the PHP handler still
+               works if it is ever put back. Netlify's own spam filtering
+               plus the honeypot are what guard the form today.
                --------------------------------------------------------------- -->
           <div style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"
                aria-hidden="true">
@@ -172,6 +199,23 @@
             <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
           </div>
           <input type="hidden" name="t" id="form-stamp">
+
+          <!-- ---------------------------------------------------------------
+               RESOLVED PROGRAMME DETAILS
+
+               The <option> values are slugs, so a submission carrying only
+               "programme" reads "strategic-hr" in the Netlify dashboard with
+               no dates and no venue. register.js fills these three in from
+               programmes.js when the form is submitted, so the stored
+               submission is readable on its own.
+
+               They are real inputs rather than values appended to the post,
+               because Netlify only records fields it can see in the
+               published HTML.
+               --------------------------------------------------------------- -->
+          <input type="hidden" name="programme_title" id="programme-title">
+          <input type="hidden" name="programme_dates" id="programme-dates">
+          <input type="hidden" name="programme_venue" id="programme-venue">
 
           <!-- ---------------------------------------------------------------
                1. DELEGATE DETAILS
@@ -574,14 +618,14 @@
 
         <!-- ---------------------------------------------------------------
              MANUAL HANDOFF — shown instead of the confirmation above when
-             no submission endpoint is configured (register.js ENDPOINT === "").
+             no submission endpoint is configured (register.js FORM_NAME === "").
 
              This panel exists so the form can never tell a delegate their
              registration was received when nothing was actually sent. It
              opens their mail client with every answer prefilled and asks
-             them to press send. The moment a Formspree/Web3Forms URL is
-             pasted into register.js, this panel stops being used and the
-             real confirmation above takes over — no markup change needed.
+             them to press send. While FORM_NAME is set — it is, submissions
+             go to Netlify Forms — this panel is unused and the real
+             confirmation above takes over. No markup change either way.
              --------------------------------------------------------------- -->
         <div class="form-success form-success--manual" id="form-manual">
           <div class="form-success__mark form-success__mark--alert">

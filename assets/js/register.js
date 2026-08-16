@@ -4,22 +4,41 @@
    confirmation panel.
 
    ---------------------------------------------------------------------------
-   SUBMISSIONS ARE LIVE (own PHP handler since 2026-08-05)
+   SUBMISSIONS GO TO NETLIFY FORMS (since 2026-08-17)
    ---------------------------------------------------------------------------
-   Registrations POST to register-handler.php, which validates them again
-   server-side and appends a backup row to registrations.csv. The handler
-   always replies with JSON — { success: true/false, message: "..." } —
-   which is what confirmSuccess()/the catch block below act on.
+   Netlify hosts static files only — it will not run PHP — so registrations no
+   longer post to register-handler.php. The handler is still in the repo for
+   reference, and register.html still carries the fields it expects, but
+   nothing on the site calls it.
 
-   IF THE ENDPOINT IS EVER CLEARED, the form falls back to MANUAL MODE: it
-   opens the delegate's mail client with every answer prefilled and shows the
+   Netlify registers the form from the data-netlify="true" markup at deploy
+   time and stores submissions itself; they appear under Forms → registration
+   in the Netlify dashboard, where email notifications can be turned on.
+
+   The post below is sent by fetch rather than by letting the browser submit
+   the form, purely so the #form-success panel can be shown in place — a plain
+   submit would navigate away to Netlify's generic success page and lose the
+   recap. Two rules come with that:
+
+     - POST to "/" as form-urlencoded, and include form-name in the BODY.
+       Netlify identifies the form by that field, not by the URL.
+     - Every field must exist in register.html. Netlify records the field
+       list it saw when the site was published and ignores anything else, so
+       a value invented here and appended to the body would vanish silently.
+       That is why programme_title/_dates/_venue are hidden inputs that this
+       file fills in, rather than extras appended to the payload.
+
+   IF FORM_NAME IS EVER CLEARED, the form falls back to MANUAL MODE: it opens
+   the delegate's mail client with every answer prefilled and shows the
    #form-manual panel, which states plainly that nothing has been sent yet. It
    deliberately does NOT show the "Registration received" confirmation —
    telling someone we have their booking when no booking reached us is worse
    than having no form at all.
    ========================================================================== */
 
-var ENDPOINT = "register-handler.php";
+/* The Netlify form name. Must match name="registration" and the hidden
+   form-name input in register.html. "" restores manual mode. */
+var FORM_NAME = "registration";
 
 (function () {
   "use strict";
@@ -33,10 +52,11 @@ var ENDPOINT = "register-handler.php";
   var manual = document.getElementById("form-manual");
   var submitBtn = document.getElementById("form-submit");
 
-  /* Half of the spam gate (see the comment on the hidden fields in
-     register.html): the handler rejects a post that arrives less than three
-     seconds after the page loaded. Stamped here rather than in the markup so
-     it reflects the load, not the cache. */
+  /* Was half of the spam gate: register-handler.php rejected a post that
+     arrived less than three seconds after the page loaded. Netlify has no
+     equivalent hook, so nothing reads this now — it is still stamped so the
+     PHP handler keeps working if it is ever put back. See the comment on the
+     hidden fields in register.html. */
   var stamp = document.getElementById("form-stamp");
   if (stamp) { stamp.value = String(Date.now()); }
 
@@ -229,7 +249,7 @@ var ENDPOINT = "register-handler.php";
 
     alertBox.classList.remove("is-shown");
 
-    if (!ENDPOINT) {
+    if (!FORM_NAME) {
       /* Manual mode — no backend configured. Hand off to email rather than
          claiming a submission that never happened. See the note at the top. */
       handOffToEmail();
@@ -239,53 +259,47 @@ var ENDPOINT = "register-handler.php";
     submitBtn.disabled = true;
     submitBtn.textContent = "Sending…";
 
-    /* The raw form posts the programme SLUG ("strategic-hr"), because that is
-       what the <option> values carry. Sent as-is, the CSV record reads
-       "programme: strategic-hr" with no dates and no venue, and someone has
-       to go and look it up. These extra fields resolve it to the real title
-       and schedule at submit time, so the CSV row is readable on its own —
-       register-handler.php reads them if present.
-
-       The names are lowercase with underscores and must stay that way: PHP
-       rewrites spaces in incoming field names to underscores, so a field
-       posted as "Programme title" arrives as $_POST['Programme_title'] and
-       the handler reading the spaced name would silently get nothing. */
-    var data = new FormData(form);
+    /* The form posts the programme SLUG ("strategic-hr"), because that is what
+       the <option> values carry. Left at that, the submission reads
+       "programme: strategic-hr" with no dates and no venue and someone has to
+       go and look it up. Resolve it into the three hidden inputs so the stored
+       submission stands on its own. Written to the inputs rather than appended
+       to the body because Netlify only keeps fields it saw in the published
+       markup — see the note at the top. */
     var chosen = FM.find(form.elements.programme.value);
 
-    if (chosen) {
-      data.append("programme_title", chosen.title);
-      data.append("programme_dates", FM.dateRange(chosen));
-      data.append("programme_venue", venueText(chosen));
-    }
+    document.getElementById("programme-title").value = chosen ? chosen.title : "";
+    document.getElementById("programme-dates").value = chosen ? FM.dateRange(chosen) : "";
+    document.getElementById("programme-venue").value = chosen ? venueText(chosen) : "";
 
-    fetch(ENDPOINT, {
+    /* Netlify wants form-urlencoded, and it is the hidden form-name field in
+       the body — not the URL posted to — that tells it which form this is.
+       Built by hand from the FormData rather than with
+       new URLSearchParams(formData), which older browsers do not accept. */
+    var body = new URLSearchParams();
+    new FormData(form).forEach(function (value, key) {
+      body.append(key, value);
+    });
+
+    fetch("/", {
       method: "POST",
-      headers: { "Accept": "application/json" },
-      body: data
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: body.toString()
     })
       .then(function (res) {
-        /* The handler always answers with JSON. If the body will not parse,
-           something upstream of it broke — PHP not installed on the host, a
-           500 page, a captive-portal interception — and the parser's own
-           message ("Unexpected token '<'…") is not something to show a
-           delegate. Swallow it and let the generic wording below stand. */
-        return res.json().catch(function () { return null; })
-          .then(function (payload) {
-            if (!res.ok || !payload || !payload.success) {
-              /* Empty string, not a bare null: new Error(null) sets .message
-                 to the literal "null", which would print in the panel. */
-              throw new Error((payload && payload.message) || "");
-            }
-            confirmSuccess();
-          });
+        /* Netlify answers 200 with its success page and has no JSON body to
+           read, so the status is the whole signal. A 404 here almost always
+           means the same thing: the form was not registered at deploy time
+           (markup changed but the site was not redeployed), and Netlify has
+           nothing to accept the post into. */
+        if (!res.ok) { throw new Error(""); }
+        confirmSuccess();
       })
-      .catch(function (err) {
+      .catch(function () {
         submitBtn.disabled = false;
         submitBtn.textContent = "Submit registration";
         alertList.innerHTML =
-          "<li>" + FM.esc(err && err.message ? err.message :
-            "We could not send your registration just now.") + " Please email " +
+          "<li>We could not send your registration just now. Please email " +
           '<a href="mailto:trainings@forumminds.com">trainings@forumminds.com</a> ' +
           "and we will pick it up from there.</li>";
         alertBox.classList.add("is-shown");
@@ -316,7 +330,7 @@ var ENDPOINT = "register-handler.php";
   }
 
   /* ------------------------------------------------------------------------
-     Manual handoff (no ENDPOINT configured)
+     Manual handoff (no FORM_NAME configured)
 
      Builds a plain-text email carrying every answer, opens the delegate's
      mail client with it, and shows the #form-manual panel. The panel says
