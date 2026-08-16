@@ -163,14 +163,18 @@
              the hidden "form-name" input below repeats it in the body of
              the post — required, and required to match.
 
-             No action=, deliberately. register.js intercepts the submit and
-             posts by fetch so the confirmation panel below can be shown
-             instead of a page change. If its JS never runs, the browser
-             falls back to a plain POST to this same page, which Netlify
-             also accepts — the registration is still recorded, the delegate
-             just lands on Netlify's own success page.
+             action="thank-you.html" is where Netlify sends the delegate once
+             it has stored the submission. Without it they land on Netlify's
+             own generic success page.
+
+             THE SUBMIT IS NOT INTERCEPTED. register.js validates on submit
+             and calls preventDefault() only when a field is wrong; a valid
+             form does a plain HTML POST, which is what Netlify catches. Do
+             not reintroduce a fetch here without reading the header of
+             register.js first.
              ----------------------------------------------------------------- -->
         <form id="register-form" name="registration" method="POST"
+              action="thank-you.html"
               data-netlify="true" netlify-honeypot="website" novalidate>
           <input type="hidden" name="form-name" value="registration" />
 
@@ -584,37 +588,11 @@
         </form>
 
         <!-- ---------------------------------------------------------------
-             CONFIRMATION — replaces the form on a successful submit
+             The in-page confirmation panel that used to sit here is gone.
+             A normal HTML POST navigates away, so there is no page left to
+             show it on — thank-you.html is the confirmation now. See the
+             history of 2026-08-17 if the fetch-based submit is restored.
              --------------------------------------------------------------- -->
-        <div class="form-success" id="form-success">
-          <div class="form-success__mark">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M4.5 12.5 9.5 17.5 20 7"/>
-            </svg>
-          </div>
-
-          <h2>Registration received</h2>
-          <p class="measure" style="margin-inline:auto">
-            Thank you. We will confirm availability and send a written quotation to the
-            email address below, usually within one working day.
-          </p>
-
-          <dl class="form-success__recap">
-            <dt>Programme</dt>
-            <dd id="recap-programme"></dd>
-            <dt>Dates</dt>
-            <dd id="recap-dates"></dd>
-            <dt>Delegates</dt>
-            <dd id="recap-delegates"></dd>
-            <dt>We will reply to</dt>
-            <dd id="recap-email"></dd>
-          </dl>
-
-          <p>
-            <a class="btn btn--ghost" href="programmes.html">Browse more programmes</a>
-          </p>
-        </div>
 
         <!-- ---------------------------------------------------------------
              MANUAL HANDOFF — shown instead of the confirmation above when

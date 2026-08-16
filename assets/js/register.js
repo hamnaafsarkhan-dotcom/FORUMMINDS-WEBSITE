@@ -15,18 +15,22 @@
    time and stores submissions itself; they appear under Forms → registration
    in the Netlify dashboard, where email notifications can be turned on.
 
-   The post below is sent by fetch rather than by letting the browser submit
-   the form, purely so the #form-success panel can be shown in place — a plain
-   submit would navigate away to Netlify's generic success page and lose the
-   recap. Two rules come with that:
+   THE BROWSER DOES THE POSTING. This file no longer intercepts the submit —
+   an earlier cut posted by fetch so an in-page confirmation panel could be
+   shown, which is a supported Netlify pattern but one more moving part
+   between the delegate and a recorded booking. The submit handler below now
+   only validates: it calls preventDefault() when a field is wrong (and in
+   manual mode), and otherwise gets out of the way so the form does a normal
+   HTML POST to its action, thank-you.html. Netlify catches that natively.
 
-     - POST to "/" as form-urlencoded, and include form-name in the BODY.
-       Netlify identifies the form by that field, not by the URL.
+   Two rules survive from that change:
+
      - Every field must exist in register.html. Netlify records the field
        list it saw when the site was published and ignores anything else, so
-       a value invented here and appended to the body would vanish silently.
-       That is why programme_title/_dates/_venue are hidden inputs that this
-       file fills in, rather than extras appended to the payload.
+       a value invented here would vanish silently. That is why
+       programme_title/_dates/_venue are hidden inputs this file fills in.
+     - Do not disable the submit button before the form data set is built.
+       Disabled controls are excluded from it.
 
    IF FORM_NAME IS EVER CLEARED, the form falls back to MANUAL MODE: it opens
    the delegate's mail client with every answer prefilled and shows the
@@ -48,7 +52,6 @@ var FORM_NAME = "registration";
 
   var alertBox = document.getElementById("form-alert");
   var alertList = document.getElementById("form-alert-list");
-  var success = document.getElementById("form-success");
   var manual = document.getElementById("form-manual");
   var submitBtn = document.getElementById("form-submit");
 
@@ -233,11 +236,14 @@ var FORM_NAME = "registration";
      Submit
      ------------------------------------------------------------------------ */
   form.addEventListener("submit", function (e) {
-    e.preventDefault();
-
     var failed = validateAll();
 
     if (failed.length) {
+      /* The ONLY place this handler cancels the submit on the Netlify path.
+         Nothing has been sent, so the delegate stays on the page with the
+         error summary. */
+      e.preventDefault();
+
       alertList.innerHTML = failed.map(function (f) {
         return '<li><a href="#' + f.name + '">' + FM.esc(f.label) + "</a></li>";
       }).join("");
@@ -252,82 +258,48 @@ var FORM_NAME = "registration";
     if (!FORM_NAME) {
       /* Manual mode — no backend configured. Hand off to email rather than
          claiming a submission that never happened. See the note at the top. */
+      e.preventDefault();
       handOffToEmail();
       return;
     }
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Sending…";
 
     /* The form posts the programme SLUG ("strategic-hr"), because that is what
        the <option> values carry. Left at that, the submission reads
        "programme: strategic-hr" with no dates and no venue and someone has to
        go and look it up. Resolve it into the three hidden inputs so the stored
-       submission stands on its own. Written to the inputs rather than appended
-       to the body because Netlify only keeps fields it saw in the published
-       markup — see the note at the top. */
+       submission stands on its own.
+
+       These are hidden INPUTS, not values appended to the post, for two
+       reasons now: Netlify only keeps fields it saw in the published markup,
+       and the browser is doing the posting — there is no payload here to
+       append to. */
     var chosen = FM.find(form.elements.programme.value);
 
     document.getElementById("programme-title").value = chosen ? chosen.title : "";
     document.getElementById("programme-dates").value = chosen ? FM.dateRange(chosen) : "";
     document.getElementById("programme-venue").value = chosen ? venueText(chosen) : "";
 
-    /* Netlify wants form-urlencoded, and it is the hidden form-name field in
-       the body — not the URL posted to — that tells it which form this is.
-       Built by hand from the FormData rather than with
-       new URLSearchParams(formData), which older browsers do not accept. */
-    var body = new URLSearchParams();
-    new FormData(form).forEach(function (value, key) {
-      body.append(key, value);
-    });
+    /* No preventDefault below this line, and no fetch. The browser now does a
+       normal HTML POST of the form to its action (thank-you.html), which is
+       what Netlify Forms catches.
 
-    fetch("/", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: body.toString()
-    })
-      .then(function (res) {
-        /* Netlify answers 200 with its success page and has no JSON body to
-           read, so the status is the whole signal. A 404 here almost always
-           means the same thing: the form was not registered at deploy time
-           (markup changed but the site was not redeployed), and Netlify has
-           nothing to accept the post into. */
-        if (!res.ok) { throw new Error(""); }
-        confirmSuccess();
-      })
-      .catch(function () {
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Submit registration";
-        alertList.innerHTML =
-          "<li>We could not send your registration just now. Please email " +
-          '<a href="mailto:trainings@forumminds.com">trainings@forumminds.com</a> ' +
-          "and we will pick it up from there.</li>";
-        alertBox.classList.add("is-shown");
-        alertBox.scrollIntoView({ behavior: "smooth", block: "center" });
-      });
+       Disabling the button only stops a double submit while the page
+       navigates; it is deferred to a timeout so it happens after the browser
+       has built the form data set, since disabled controls are excluded from
+       it. This button carries no name and would contribute nothing either
+       way, but the ordering is the kind of thing that gets copied to a
+       control that does. */
+    setTimeout(function () {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Sending…";
+    }, 0);
   });
 
-  /* ------------------------------------------------------------------------
-     Confirmation
-     ------------------------------------------------------------------------ */
-  function confirmSuccess() {
-    var p = FM.find(form.elements.programme.value);
-
-    document.getElementById("recap-programme").textContent =
-      p ? p.title : "To be confirmed";
-
-    document.getElementById("recap-dates").textContent =
-      p ? FM.dateRange(p) + " · " + venueText(p) : "We will be in touch to agree dates";
-
-    document.getElementById("recap-delegates").textContent =
-      form.elements.delegates.value +
-      " delegate" + (Number(form.elements.delegates.value) === 1 ? "" : "s");
-
-    document.getElementById("recap-email").textContent =
-      form.elements.email.value.trim();
-
-    reveal(success);
-  }
+  /* The in-page confirmation panel (#form-success) and the confirmSuccess()
+     that filled its recap are gone: a normal HTML POST navigates away, so
+     there is no page left to show them on. thank-you.html is the confirmation
+     now. Both are in the history of 2026-08-17 if the fetch-based submit is
+     ever restored. */
 
   /* ------------------------------------------------------------------------
      Manual handoff (no FORM_NAME configured)
