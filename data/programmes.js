@@ -29,10 +29,14 @@
    ---------------------------------------------------------------------------
    - "venue"  : city venues below are proposed, not confirmed. Only the
                 "Live Online" entries are certain.
-   - "fee"    : currently "On request" throughout, which routes buyers to the
-                enquiry form. Replace with real figures when you set pricing.
-   - "trainer": "Industry Expert" is what forumminds.com states today. Replace
-                with real trainer names and bios when available.
+   - "fee"    : "On request" on every programme except financial-modelling-ai,
+                which carries a real price. "On request" routes buyers to the
+                enquiry form. When you set a real figure, also set the
+                "feeAmount"/"feeCurrency" pair so the page's structured data
+                can state the price (see that programme for the pattern).
+   - "trainer": "Industry Expert" on every programme except
+                financial-modelling-ai, which names its real facilitator.
+                Replace the rest with real names and bios when available.
    ========================================================================== */
 
 /* Category IDs used by "category" below, in menu order.
@@ -287,6 +291,29 @@ const PROGRAMMES = [
     image: "assets/img/programmes/ai-ready-critical-thinking.jpg",
     url: "programme-ai-ready-critical-thinking.html",
     summary: "How to interrogate an AI-generated answer: spotting confident nonsense, testing reasoning, and deciding what still needs a human judgement call."
+  },
+  {
+    slug: "financial-modelling-ai",
+    title: "Financial Modelling with Excel, Power BI & AI",
+    category: ["finance", "ai"],
+    startDate: "2026-11-16",
+    endDate: "2026-11-17",
+    days: 2,
+    format: "online",
+    venue: "Live Online",
+    level: "Advanced",
+    fee: "USD 595 per delegate",
+    /* The first programme with real pricing. feeAmount/feeCurrency are the
+       machine-readable pair — programme-page.js emits schema.org "offers"
+       only when both are present, so the "On request" programmes above are
+       unaffected. Keep them in step with "fee" above. */
+    feeAmount: 595,
+    feeCurrency: "USD",
+    trainer: "Duncan Williamson",
+    country: "Online",
+    image: "assets/img/programmes/financial-modelling-ai.jpg",
+    url: "programme-financial-modelling-ai.html",
+    summary: "Build integrated, auditable financial models in Excel, then extend them into Power BI dashboards and AI-assisted forecasting — with the judgement to know which tool each job actually needs."
   }
 ];
 

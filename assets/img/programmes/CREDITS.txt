@@ -15,6 +15,7 @@ Source: StockSnap.io (CC0 1.0 Universal) unless noted.
   elite-executive-assistant.jpg    StockSnap KPVOIKEPSG  "Colleagues Meeting"
   advanced-budgeting.jpg           StockSnap RRJH1KMRMW  "Business Working"
   ai-ready-critical-thinking.jpg   StockSnap XDAR6MIG75  "Business Presenting"
+  financial-modelling-ai.jpg       StockSnap 2O0IOI1DA8  "Data Chart"
 
   ai-supply-chains.jpg             Rawpixel (CC0) "Shipping containers port"
 

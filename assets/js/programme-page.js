@@ -146,10 +146,11 @@
      reason the facts above are: a hand-maintained copy would eventually
      disagree with the calendar. Google reads JSON-LD that JavaScript injects.
 
-     Deliberately omitted: `offers`, because every fee is still "On request" —
-     a price field with no price in it is worse than no price field. Add it
-     here once real pricing exists. `location` names the city only, since the
-     venue is proposed rather than booked (see FM.venueIsProposed).
+     `offers` is emitted only for a programme carrying the machine-readable
+     feeAmount/feeCurrency pair. One still priced "On request" gets no offers
+     block at all — a price field with no price in it is worse than no price
+     field. `location` names the city only, since the venue is proposed
+     rather than booked (see FM.venueIsProposed).
      ------------------------------------------------------------------------ */
   var course = {
     "@context": "https://schema.org",
@@ -168,6 +169,19 @@
 
   if (p.image) {
     course.image = "https://forumminds.com/" + p.image;
+  }
+
+  /* See the note above: guarded on the pair, so adding a real price to a
+     programme is the only thing needed to make its structured data state it. */
+  if (typeof p.feeAmount === "number" && p.feeCurrency) {
+    course.offers = {
+      "@type": "Offer",
+      "price": p.feeAmount,
+      "priceCurrency": p.feeCurrency,
+      "category": "Paid",
+      "url": "https://forumminds.com/register.html?programme=" +
+             encodeURIComponent(p.slug)
+    };
   }
 
   if (p.startDate) {
